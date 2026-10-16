@@ -1,0 +1,99 @@
+# SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+# SPDX-License-Identifier: Apache-2.0
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+joints:
+  left_leg:
+    - left_hip_pitch_joint
+    - left_hip_roll_joint
+    - left_hip_yaw_joint
+    - left_knee_joint
+    - left_ankle_roll_joint
+    - left_ankle_pitch_joint
+  right_leg:
+    - right_hip_pitch_joint
+    - right_hip_roll_joint
+    - right_hip_yaw_joint
+    - right_knee_joint
+    - right_ankle_roll_joint
+    - right_ankle_pitch_joint
+  waist:
+    - waist_yaw_joint
+    - waist_roll_joint
+    - waist_pitch_joint
+  head:
+    - head_pitch_joint
+    - head_yaw_joint
+  left_arm:
+    - left_shoulder_pitch_joint
+    - left_shoulder_roll_joint
+    - left_shoulder_yaw_joint
+    - left_elbow_joint
+    - left_wrist_roll_joint
+    - left_wrist_pitch_joint
+    - left_wrist_yaw_joint
+  right_arm:
+    - right_shoulder_pitch_joint
+    - right_shoulder_roll_joint
+    - right_shoulder_yaw_joint
+    - right_elbow_joint
+    - right_wrist_roll_joint
+    - right_wrist_pitch_joint
+    - right_wrist_yaw_joint
+  left_hand:
+    - left_thumb_CMC_FE
+    - left_thumb_CMC_AA
+    - left_thumb_MCP_FE
+    - left_thumb_MCP_AA
+    - left_thumb_IP
+    - left_index_MCP_FE
+    - left_index_MCP_AA
+    - left_index_PIP
+    - left_index_DIP
+    - left_middle_MCP_FE
+    - left_middle_MCP_AA
+    - left_middle_PIP
+    - left_middle_DIP
+    - left_ring_MCP_FE
+    - left_ring_MCP_AA
+    - left_ring_PIP
+    - left_ring_DIP
+    - left_pinky_CMC
+    - left_pinky_MCP_FE
+    - left_pinky_MCP_AA
+    - left_pinky_PIP
+    - left_pinky_DIP
+  right_hand:
+    - right_thumb_CMC_FE
+    - right_thumb_CMC_AA
+    - right_thumb_MCP_FE
+    - right_thumb_MCP_AA
+    - right_thumb_IP
+    - right_index_MCP_FE
+    - right_index_MCP_AA
+    - right_index_PIP
+    - right_index_DIP
+    - right_middle_MCP_FE
+    - right_middle_MCP_AA
+    - right_middle_PIP
+    - right_middle_DIP
+    - right_ring_MCP_FE
+    - right_ring_MCP_AA
+    - right_ring_PIP
+    - right_ring_DIP
+    - right_pinky_CMC
+    - right_pinky_MCP_FE
+    - right_pinky_MCP_AA
+    - right_pinky_PIP
+    - right_pinky_DIP

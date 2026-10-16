@@ -1,0 +1,75 @@
+# SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+# SPDX-License-Identifier: Apache-2.0
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# Left-hand variant of static_apple_task.yaml. The left hand performs the transfer
+# while the right hand supplies only support motion.
+
+name: g1_static_apple_transfer
+description: G1 picks an apple off the table with its left hand and places it on the plate.
+algo: dexmimicgen
+
+generation_policy:
+  name: g1_static_apple_transfer
+  seed: 1
+  num_trials: 1000
+  guarantee_success: true
+  keep_failed: false
+  source_dataset_path: null
+  generation_path: null
+  task_name: null
+  use_skillgen: false
+  use_navigation_controller: false
+  select_src_per_subtask: false
+  select_src_per_arm: false
+  transform_first_robot_pose: false
+  interpolate_from_last_target_pose: true
+
+subtasks:
+  left:
+    - object_ref: object
+      description: Approach and grasp the apple with the left hand.
+      subtask_term_signal: left_hand_holds_object
+      first_subtask_start_offset_range: [0, 0]
+      subtask_term_offset_range: [0, 0]
+      selection_strategy: nearest_neighbor_object
+      selection_strategy_kwargs:
+        nn_k: 3
+      action_noise: 0.003
+      num_interpolation_steps: 0
+      num_fixed_steps: 0
+      apply_noise_during_interpolation: false
+
+    - object_ref: object
+      description: Transport the apple to the plate and release it.
+      subtask_term_offset_range: [0, 0]
+      selection_strategy: nearest_neighbor_object
+      selection_strategy_kwargs:
+        nn_k: 3
+      action_noise: 0.003
+      num_interpolation_steps: 3
+      num_fixed_steps: 0
+      apply_noise_during_interpolation: false
+
+  right:
+    - object_ref: object
+      description: Right-hand support motion throughout the transfer.
+      subtask_term_offset_range: [0, 0]
+      selection_strategy: nearest_neighbor_object
+      selection_strategy_kwargs:
+        nn_k: 3
+      action_noise: 0.003
+      num_interpolation_steps: 0
+      num_fixed_steps: 0
+      apply_noise_during_interpolation: false

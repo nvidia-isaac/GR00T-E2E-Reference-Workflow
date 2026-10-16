@@ -1,0 +1,47 @@
+# SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+# SPDX-License-Identifier: Apache-2.0
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# Static apple task config for Arena's Gr00tRemoteClosedloopPolicy, passed by
+# tools/launch_gr00t_eval.sh to the policy runner. The policy requests actions from the
+# GR00T inference server that tools/launch_gr00t_server.sh starts, which serves a
+# checkpoint finetuned from `nvidia/GR00T-N1.7-3B` per docs/how-to/fine-tune-gr00t.md.
+language_instruction: "move the apple to the plate"
+
+# Must match the action_horizon baked into the finetuned checkpoint, i.e. the action
+# modality's `delta_indices=list(range(N))` in the modality config below. Fine-tuning
+# trains at 40; if you change one, change both.
+action_horizon: 40
+
+# Fine-tuning uses --embodiment-tag new_embodiment, and Arena asserts NEW_EMBODIMENT for
+# the g1_locomanipulation task mode set below.
+embodiment_tag: NEW_EMBODIMENT
+
+video_backend: decord
+
+# The same modality config fine-tuning registers, so evaluation and training cannot
+# disagree about the checkpoint's modality layout.
+modality_config_path: src/e2e_robot_workflows/gr00t/g1_static_apple_modality_config.py
+
+# Shared with configs/stages/gr00t_lerobot_dataset.yaml, so the joint ordering the
+# converter writes is the ordering evaluation reads back.
+policy_joints_config_path: configs/stages/gr00t/gr00t_43dof_joint_space.yaml
+action_joints_config_path: configs/stages/gr00t/43dof_joint_space.yaml
+state_joints_config_path: configs/stages/gr00t/43dof_joint_space.yaml
+
+# Number of actions the server emits per chunk; <= action_horizon.
+action_chunk_length: 40
+pov_cam_name_sim: "robot_head_cam_rgb"
+
+task_mode_name: g1_locomanipulation

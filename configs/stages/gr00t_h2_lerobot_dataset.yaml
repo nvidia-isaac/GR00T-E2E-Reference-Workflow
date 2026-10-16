@@ -1,0 +1,61 @@
+# SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+# SPDX-License-Identifier: Apache-2.0
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+data_root: ./datasets
+language_instruction: move the apple to the plate
+task_index: 3
+hdf5_name: e2e_ra_dataset_arena_h2.hdf5
+
+writer: e2e_robot_workflows.gr00t.lerobot_writer:write_lerobot_dataset
+
+manifest_admission:
+  required: true
+  accepted_profiles:
+    - {lane: arena, controller: h2_agile_pink, layout: arena_h2_agile_pink_61d_v1}
+  unmanifested_action_widths: []
+
+hdf5_fields:
+  state: robot_joint_pos
+  action: joint_pos_target
+  video: robot_head_cam_rgb
+  navigate_command: navigate_cmd
+
+required_fields: [state, action, video, navigate_command]
+optional_fields: []
+
+lerobot_fields:
+  state: observation.state
+  action: action
+  video: observation.images.ego_view
+  task_description: annotation.human.task_description
+  navigate_command: teleop.navigate_command
+
+robot:
+  type: unitree_h2plus
+  policy_joints_config_path: configs/stages/gr00t/gr00t_h2_75dof_joint_space.yaml
+  action_joints_config_path: configs/stages/gr00t/h2_75dof_joint_space.yaml
+  state_joints_config_path: configs/stages/gr00t/h2_75dof_joint_space.yaml
+
+video:
+  # Direct-writer default; the converter binds this to the source manifest.
+  fps: 100
+  original_image_size: [480, 640, 3]
+  target_image_size: [480, 640, 3]
+
+paths:
+  data_path: data/chunk-{episode_chunk:03d}/episode_{episode_index:06d}.parquet
+  video_path: videos/chunk-{episode_chunk:03d}/{video_key}/episode_{episode_index:06d}.mp4
+  modality_template_path: configs/stages/gr00t/h2_modality.json
+  info_template_path: configs/stages/gr00t/info.json

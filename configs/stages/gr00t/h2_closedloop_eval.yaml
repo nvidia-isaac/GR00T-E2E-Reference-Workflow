@@ -1,0 +1,25 @@
+# SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+# SPDX-License-Identifier: Apache-2.0
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+language_instruction: "move the apple to the plate"
+robot_type: unitree_h2plus
+action_horizon: 40
+embodiment_tag: NEW_EMBODIMENT
+modality_config_path: src/e2e_robot_workflows/gr00t/h2_static_apple_modality_config.py
+policy_joints_config_path: configs/stages/gr00t/gr00t_h2_75dof_joint_space.yaml
+action_joints_config_path: configs/stages/gr00t/h2_58dof_action_space.yaml
+state_joints_config_path: configs/stages/gr00t/h2_75dof_joint_space.yaml
+action_chunk_length: 40
+pov_cam_name_sim: [robot_head_cam_rgb]

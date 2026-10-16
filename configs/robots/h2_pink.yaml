@@ -1,0 +1,232 @@
+# SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+# SPDX-License-Identifier: Apache-2.0
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# Public H2 Plus plant and deterministic Pink/Sharpa sidecar contract.
+
+schema_version: 1
+
+simulation_usd:
+  url: https://omniverse-content-production.s3-us-west-2.amazonaws.com/Assets/Isaac/6.1/Isaac/Robots/Unitree/H2plus/unitree_h2.usda
+  sha256: 7ed2e8acc9530ed4359539bf866a3138517878baab370e50fbe67121886ecd5d
+  variants:
+    Physics: physx
+    hands: sharpa
+    collision_profile: full
+  dependencies:
+    payloads/Physics/mujoco.usda: 54be8eddde0984290ff0a2e609038fd0322a7e5f1348a16a597132493d04ce64
+    payloads/Physics/physics.usda: 2c19ecf08cdd6e8c2b8d65c86a291564ec95c6cf29b486c94dadaff0ff9368fe
+    payloads/Physics/physx.usda: 3a79bf5fa839863d26d2b4dc8249788a003b88b9b1c268737695ac9a56a0d009
+    payloads/base.usda: 294b7a21b5fe589a07ff6b9ed94e003a5dcd3f3cce1bcf5b7a91b8883f9686ac
+    payloads/collision_profile/feet_only.usda: da32e5ed7d69c2ec8a8fe3101d8e8404f347530a7e9aa6a124b60a5675e358b4
+    payloads/collision_profile/full.usda: 0f738a38d5c0106faa99c7ed5aa4c24703e29a1f89e4cd0783de2ceba7d6a04f
+    payloads/geometries.usd: 7bc6bc9b3c45f3787755f84b8eaba8eed4b9acdb353442b5d570823dd3877abc
+    payloads/hands/dependencies/Contents.usda: 7f4b94bef204e63aebbfb33a067ea78a6dcb2372ecf48b75ad47f118c308f9c8
+    payloads/hands/dependencies/Contents_1.usda: 270e827c641555cc26940f0d5298042363be698e45d7d9fa538e74895c63239c
+    payloads/hands/dependencies/Geometry.usda: 7e179c9c58dd278a8ee31a33b5ea5e31c0ab54732927f342707d8139d8f08fcb
+    payloads/hands/dependencies/GeometryLibrary.usdc: 840dc4f6bf8ef2d291dfdb5ae508fd16079696339222f0ca654c83287a3c65a6
+    payloads/hands/dependencies/GeometryLibrary_1.usdc: 8de7cedb5253957faec05673a247ea993fbf83c316b86308b2911fc7023bdc34
+    payloads/hands/dependencies/Geometry_1.usda: a8765d60f565da867d2529c8f3637357d7b6d6f48e43f37df5c9f50f93c67ef6
+    payloads/hands/dependencies/Physics.usda: 1cde0cae24151d2798f295e6565dd1ec1c4051cdbc602c78b22599ec3d93657b
+    payloads/hands/dependencies/Physics_1.usda: 15464cbba92369edcc9b6d181f0a568792808d3f5c1fccd6697adb03391fe25b
+    payloads/hands/dependencies/left_sharpa_wave_attachment.usda: bcaf8de494c43173a04459e7ec461bd259afe51120f30be99abc7193e5d7ae64
+    payloads/hands/dependencies/right_sharpa_wave_attachment.usda: a8322d9a938947a19ce8b10d434c47550c9a5f19c7013f4e68961a0b9ebf300b
+    payloads/hands/none.usda: 0f738a38d5c0106faa99c7ed5aa4c24703e29a1f89e4cd0783de2ceba7d6a04f
+    payloads/hands/sharpa.usda: ff8859f747a7648cde137788cc8edbb6cad12e1e1516ff2fc2e09e9e595370ba
+    payloads/instances.usda: 9043af0c28322287796d4cc0ad2e779b4310520bb71cf59ba47710561c33f788
+    payloads/robot.usda: d842b5b56c6d8f9a7c93e343c024711b009c6f39ec2d61d0a4c9d207a3346d59
+
+pink_kinematics:
+  urdf_env_var: E2E_H2_PINK_URDF
+  urdf_sha256: fc691fe6fbd4d3b0bc6fd96c118436e930087f42884f19f531ac13f6065f1bf0
+  source_contract_sha256: cad338af883e420613a505da8e990d33d25699821554916a424ed24478a6f858
+  arena_usd_sha256: 2fa2f8219b23ebcb21bf72f487a9341e8d4e77512bd7c8b520380852b08c88da
+  arena_recipe_version: 3
+  generation_recipe_version: 2
+  isaacsim_version: 6.0.0.1
+  expected_body_count: 80
+  base_frame: pelvis
+  source_pelvis_translation_xyz: [0.0, 0.0, 1.2]
+  flange_frames: [left_hand_flange, right_hand_flange]
+
+action:
+  dimension: 58
+  # Exact limits projected from the pinned Pink URDF onto the 58 joints learned
+  # by GR00T (14 arms, then 44 Sharpa joints). Offline admission uses this table;
+  # simulator validation checks it against the materialized sidecar and live
+  # articulation before evaluation can apply learned targets.
+  learned_joint_position_limits:
+    left_shoulder_pitch_joint: [-2.618, 1.83299998]
+    left_shoulder_roll_joint: [-0.517, 2.49400003]
+    left_shoulder_yaw_joint: [-2.618, 2.618]
+    left_elbow_joint: [-0.98599997, 3.07099998]
+    left_wrist_roll_joint: [-2.618, 2.618]
+    left_wrist_pitch_joint: [-0.576, 0.576]
+    left_wrist_yaw_joint: [-1.21999995, 1.21999995]
+    right_shoulder_pitch_joint: [-2.618, 1.83299998]
+    right_shoulder_roll_joint: [-2.49400003, 0.517]
+    right_shoulder_yaw_joint: [-2.618, 2.618]
+    right_elbow_joint: [-0.98599997, 3.07099998]
+    right_wrist_roll_joint: [-2.618, 2.618]
+    right_wrist_pitch_joint: [-0.576, 0.576]
+    right_wrist_yaw_joint: [-1.21999995, 1.21999995]
+    left_thumb_CMC_FE: [-0.1745, 1.91989999]
+    left_index_MCP_FE: [-0.17453293, 1.57080006]
+    left_middle_MCP_FE: [-0.17453293, 1.57080006]
+    left_ring_MCP_FE: [-0.17453293, 1.57080006]
+    left_pinky_CMC: [0.0, 0.2618]
+    right_thumb_CMC_FE: [-0.1745, 1.91989999]
+    right_index_MCP_FE: [-0.17453293, 1.57080006]
+    right_middle_MCP_FE: [-0.17453293, 1.57080006]
+    right_ring_MCP_FE: [-0.17453293, 1.57080006]
+    right_pinky_CMC: [0.0, 0.2618]
+    left_thumb_CMC_AA: [-0.34910001, 0.34910001]
+    left_index_MCP_AA: [-0.34910001, 0.34910001]
+    left_middle_MCP_AA: [-0.34910001, 0.34910001]
+    left_ring_MCP_AA: [-0.34910001, 0.34910001]
+    left_pinky_MCP_FE: [-0.17453293, 1.57080006]
+    right_thumb_CMC_AA: [-0.34910001, 0.34910001]
+    right_index_MCP_AA: [-0.34910001, 0.34910001]
+    right_middle_MCP_AA: [-0.34910001, 0.34910001]
+    right_ring_MCP_AA: [-0.34910001, 0.34910001]
+    right_pinky_MCP_FE: [-0.17453293, 1.57080006]
+    left_thumb_MCP_FE: [-0.52360001, 1.39630002]
+    left_index_PIP: [0.0, 1.74529996]
+    left_middle_PIP: [0.0, 1.74529996]
+    left_ring_PIP: [0.0, 1.74529996]
+    left_pinky_MCP_AA: [-0.34910001, 0.34910001]
+    right_thumb_MCP_FE: [-0.52360001, 1.39630002]
+    right_index_PIP: [0.0, 1.74529996]
+    right_middle_PIP: [0.0, 1.74529996]
+    right_ring_PIP: [0.0, 1.74529996]
+    right_pinky_MCP_AA: [-0.34910001, 0.34910001]
+    left_thumb_MCP_AA: [-0.34910001, 0.34910001]
+    left_index_DIP: [0.0, 1.39630002]
+    left_middle_DIP: [0.0, 1.39630002]
+    left_ring_DIP: [0.0, 1.39630002]
+    left_pinky_PIP: [0.0, 1.74529996]
+    right_thumb_MCP_AA: [-0.34910001, 0.34910001]
+    right_index_DIP: [0.0, 1.39630002]
+    right_middle_DIP: [0.0, 1.39630002]
+    right_ring_DIP: [0.0, 1.39630002]
+    right_pinky_PIP: [0.0, 1.74529996]
+    left_thumb_IP: [0.0, 1.74529996]
+    left_pinky_DIP: [0.0, 1.39630002]
+    right_thumb_IP: [0.0, 1.74529996]
+    right_pinky_DIP: [0.0, 1.39630002]
+  controller_synergy:
+    open_position: 0.0
+    closed_targets:
+      - {pattern: .*_thumb_CMC_FE, closed_position: 1.2}
+      - {pattern: .*_thumb_CMC_AA, closed_position: 0.25}
+      - {pattern: .*_thumb_MCP_FE, closed_position: 0.9}
+      - {pattern: .*_thumb_MCP_AA, closed_position: 0.25}
+      - {pattern: .*_thumb_IP, closed_position: 1.0}
+      - {pattern: .*_(index|middle|ring|pinky)_MCP_FE, closed_position: 1.1}
+      - {pattern: .*_(index|middle|ring|pinky)_MCP_AA, closed_position: 0.0}
+      - {pattern: .*_(index|middle|ring|pinky)_PIP, closed_position: 1.2}
+      - {pattern: .*_(index|middle|ring|pinky)_DIP, closed_position: 0.9}
+      - {pattern: .*_pinky_CMC, closed_position: 0.18}
+  arm_joint_names:
+    - left_shoulder_pitch_joint
+    - left_shoulder_roll_joint
+    - left_shoulder_yaw_joint
+    - left_elbow_joint
+    - left_wrist_roll_joint
+    - left_wrist_pitch_joint
+    - left_wrist_yaw_joint
+    - right_shoulder_pitch_joint
+    - right_shoulder_roll_joint
+    - right_shoulder_yaw_joint
+    - right_elbow_joint
+    - right_wrist_roll_joint
+    - right_wrist_pitch_joint
+    - right_wrist_yaw_joint
+  body_joint_order:
+    - left_hip_pitch_joint
+    - right_hip_pitch_joint
+    - waist_yaw_joint
+    - left_hip_roll_joint
+    - right_hip_roll_joint
+    - waist_roll_joint
+    - left_hip_yaw_joint
+    - right_hip_yaw_joint
+    - waist_pitch_joint
+    - left_knee_joint
+    - right_knee_joint
+    - head_pitch_joint
+    - left_shoulder_pitch_joint
+    - right_shoulder_pitch_joint
+    - left_ankle_roll_joint
+    - right_ankle_roll_joint
+    - head_yaw_joint
+    - left_shoulder_roll_joint
+    - right_shoulder_roll_joint
+    - left_ankle_pitch_joint
+    - right_ankle_pitch_joint
+    - left_shoulder_yaw_joint
+    - right_shoulder_yaw_joint
+    - left_elbow_joint
+    - right_elbow_joint
+    - left_wrist_roll_joint
+    - right_wrist_roll_joint
+    - left_wrist_pitch_joint
+    - right_wrist_pitch_joint
+    - left_wrist_yaw_joint
+    - right_wrist_yaw_joint
+  hand_joint_order:
+    - left_thumb_CMC_FE
+    - left_index_MCP_FE
+    - left_middle_MCP_FE
+    - left_ring_MCP_FE
+    - left_pinky_CMC
+    - right_thumb_CMC_FE
+    - right_index_MCP_FE
+    - right_middle_MCP_FE
+    - right_ring_MCP_FE
+    - right_pinky_CMC
+    - left_thumb_CMC_AA
+    - left_index_MCP_AA
+    - left_middle_MCP_AA
+    - left_ring_MCP_AA
+    - left_pinky_MCP_FE
+    - right_thumb_CMC_AA
+    - right_index_MCP_AA
+    - right_middle_MCP_AA
+    - right_ring_MCP_AA
+    - right_pinky_MCP_FE
+    - left_thumb_MCP_FE
+    - left_index_PIP
+    - left_middle_PIP
+    - left_ring_PIP
+    - left_pinky_MCP_AA
+    - right_thumb_MCP_FE
+    - right_index_PIP
+    - right_middle_PIP
+    - right_ring_PIP
+    - right_pinky_MCP_AA
+    - left_thumb_MCP_AA
+    - left_index_DIP
+    - left_middle_DIP
+    - left_ring_DIP
+    - left_pinky_PIP
+    - right_thumb_MCP_AA
+    - right_index_DIP
+    - right_middle_DIP
+    - right_ring_DIP
+    - right_pinky_PIP
+    - left_thumb_IP
+    - left_pinky_DIP
+    - right_thumb_IP
+    - right_pinky_DIP

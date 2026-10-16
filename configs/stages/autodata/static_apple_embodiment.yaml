@@ -1,0 +1,57 @@
+# SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+# SPDX-License-Identifier: Apache-2.0
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# Embodiment descriptor for this repository's static apple task (G1, whole-body IK, absolute pose).
+#
+# This is AutoData's isaac_autodata_examples/embodiments/g1_ik_abs.yaml without the trailing base
+# command. Both descriptors describe the same Isaac Lab action term -- our env cfg subclasses the
+# same LocomanipulationG1EnvCfg that AutoData's G1 example drives, so the pose and hand slices and
+# the wrist frames the poses are read from are inherited unchanged.
+#
+# The difference is the lower body: we record with wbc_mode "fixed" (configs/robots/g1.yaml), which
+# pins the root and drops the AGILE action term, leaving a 28-D action instead of 32-D.
+#
+# Action vector layout (28-D):
+#   [0..3)    left EEF position [m]
+#   [3..7)    left EEF quaternion (x, y, z, w)
+#   [7..10)   right EEF position [m]
+#   [10..14)  right EEF quaternion (x, y, z, w)
+#   [14..28)  hand joint positions (14 DOF, interleaved L/R by URDF order)
+#
+# The hand joints are interleaved rather than block-contiguous, so each hand owns scattered
+# indices within the hand slice; see the example descriptor for the full joint ordering.
+
+type: absolute_pose_whole_body_bimanual
+name: g1_static_apple
+description: Unitree G1 with three-finger hands transferring an apple, fixed base, absolute-pose control.
+
+eefs:
+  left:
+    pose_obs_keys:
+      pos: left_eef_pos
+      quat: left_eef_quat
+    gripper_action_indices: [0, 1, 2, 6, 7, 8, 12]
+
+  right:
+    pose_obs_keys:
+      pos: right_eef_pos
+      quat: right_eef_quat
+    gripper_action_indices: [3, 4, 5, 9, 10, 11, 13]
+
+action_layout:
+  left_pose_slice: [0, 7]
+  right_pose_slice: [7, 14]
+  hand_joints_slice: [14, 28]
+  canonicalize_quat: true

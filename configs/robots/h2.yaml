@@ -1,0 +1,184 @@
+# SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+# SPDX-License-Identifier: Apache-2.0
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# Unitree H2 Plus defaults for the Arena AGILE/Pink path.
+#
+# The AGILE export names no joints, states no control rate, and identifies no
+# platform. Everything under `agile:` was recovered by probing the graph rather
+# than read from a sidecar, so each value carries its provenance below. The
+# recovery itself is recorded in the eng-ledger under
+# `projects/dirt/experiments/h2-agile-ports`.
+#
+# The plant is exclusively owned by configs/robots/h2_pink.yaml. The gated
+# checkpoint remains an environment input, but its Hub provenance and content
+# identity are pinned here.
+policy_env_var: E2E_H2_AGILE_POLICY
+policy_repository: nvidia/agile_wbc_unitree_h2
+policy_revision: ad9c3c0d2c5ed5b353747dc7603ee5a1b38b628f
+policy_filename: agile_velocity.onnx
+
+# The export is identified by content rather than by filename: a different
+# checkpoint left at the same path would otherwise be driven with this file's
+# joint mapping, which fails as a fall rather than as an error.
+policy_sha256: 9d37d46453c8eabc7a94acead58a75293e3127f080835202f98858bc3c51fe3d
+
+# Robot pose is an embodiment binding, not part of a shared environment.
+#
+# Standing at the packing table, facing it, where the G1 stands: the rotation is
+# the same quarter turn onto +y, and x is the midpoint of the apple and plate, so
+# the props are in front of the robot rather than off to one side. Only the
+# standoff differs, because H2 Plus is the larger robot. The table's near face is
+# at y = 0.2495; this stands the pelvis 0.34 m back
+# from it, against the G1's 0.17 m.
+#
+# That clearance is also the walk budget, and it is why the validation walks away
+# from the table rather than into it. Moving the robot closer shrinks a margin the
+# run depends on, so change it against `cell.clearance_to_support_m`.
+initial_pose:
+  position_xy: [0.29, 0.0]
+  rotation_xyzw: [0.0, 0.0, 0.70711, 0.70711]
+  joint_pos:
+    left_shoulder_pitch_joint: -0.95
+    right_shoulder_pitch_joint: -0.95
+    left_shoulder_roll_joint: 0.05
+    right_shoulder_roll_joint: -0.05
+    left_shoulder_yaw_joint: 0.16
+    right_shoulder_yaw_joint: -0.16
+    left_elbow_joint: 0.7
+    right_elbow_joint: 0.7
+    # Seed the supported zero-command AGILE stance, not its graph's reference
+    # offsets. The latter are not an equilibrium pose for this plant.
+    # These asymmetric seeds are from simulator bring-up with the full Sharpa
+    # plant, not physical H2 hardware qualification. Preserve the measured pose;
+    # changing it requires the startup and locomotion gates to be requalified.
+    left_hip_pitch_joint: -0.643
+    right_hip_pitch_joint: -0.643
+    left_hip_roll_joint: 0.086
+    right_hip_roll_joint: 0.014
+    left_hip_yaw_joint: -0.156
+    right_hip_yaw_joint: 0.544
+    waist_roll_joint: 0.015
+    waist_pitch_joint: 0.027
+    left_knee_joint: 0.907
+    right_knee_joint: 0.709
+    left_ankle_roll_joint: -0.049
+    right_ankle_roll_joint: 0.212
+    left_ankle_pitch_joint: -0.359
+    right_ankle_pitch_joint: -0.169
+
+# Robot-specific body names used by task predicates. Geometry and thresholds for
+# the H2 static-apple workcell live in configs/tasks/static_apple.yaml.
+task_link_names: [left_hand_flange, right_hand_flange]
+
+standing:
+  # Measured supported stance with the full Sharpa plant; qualify cold starts
+  # and walking whenever this height or the reset joints above change.
+  pelvis_height_m: 0.956
+
+agile:
+  # Not stated by the export. Recovered from velocity tracking: 100 Hz tracks a
+  # 0.5 m/s command to 0.2%, 50 Hz undertracks it by 29%. The G1 sibling of this
+  # same policy family runs at 50 Hz, so the rate does not transfer between them.
+  control_hz: 100
+
+  # Pink and AGILE still run every control step. The head camera holds its latest
+  # image between captures, so actions and state remain sampled at control_hz.
+  render_hz: 50
+  camera_hz: 25
+
+  # [vx, vy, wz]. The G1 export takes a fourth hip-height channel; this one has
+  # no height and no torso-orientation channel.
+  command_dim: 3
+
+  # Shared recorder, dataset-admission, and evaluation envelope for [vx, vy,
+  # wz]. Keeping this beside the checkpoint command contract prevents the XR
+  # and GR00T paths from silently accepting different locomotion commands.
+  navigate_command_limits:
+    - [-0.5, 0.5]
+    - [-0.5, 0.5]
+    - [-0.5, 0.5]
+
+  # Every history port is (batch, 5, width).
+  history_length: 5
+
+  # The `joint_pos` and `joint_vel` ports are positional over all 31 joints, in
+  # the order PhysX enumerates DOFs -- breadth-first over links, which is why
+  # this interleaves left and right and cannot be read off the MJCF. A
+  # breadth-first walk reproduces the G1 checkpoint's published sidecar ordering
+  # exactly, which is what establishes the rule before it is applied here.
+  #
+  # This is asserted, never applied: no code reorders anything to match it. The
+  # action term compares the live articulation against it at construction and
+  # refuses to run on a mismatch, because a permuted observation is not an error
+  # the export can report -- it is an observation that means something else. The
+  # order is a property of a checkpoint that names no joints, so it has to be
+  # written down somewhere, and the only alternative to declaring it is burying
+  # 31 strings in Python.
+  expected_joint_order:
+    - left_hip_pitch_joint
+    - right_hip_pitch_joint
+    - waist_yaw_joint
+    - left_hip_roll_joint
+    - right_hip_roll_joint
+    - waist_roll_joint
+    - left_hip_yaw_joint
+    - right_hip_yaw_joint
+    - waist_pitch_joint
+    - left_knee_joint
+    - right_knee_joint
+    - head_pitch_joint
+    - left_shoulder_pitch_joint
+    - right_shoulder_pitch_joint
+    - left_ankle_roll_joint
+    - right_ankle_roll_joint
+    - head_yaw_joint
+    - left_shoulder_roll_joint
+    - right_shoulder_roll_joint
+    - left_ankle_pitch_joint
+    - right_ankle_pitch_joint
+    - left_shoulder_yaw_joint
+    - right_shoulder_yaw_joint
+    - left_elbow_joint
+    - right_elbow_joint
+    - left_wrist_roll_joint
+    - right_wrist_roll_joint
+    - left_wrist_pitch_joint
+    - right_wrist_pitch_joint
+    - left_wrist_yaw_joint
+    - right_wrist_yaw_joint
+
+  # The 14 joints the export drives, in its own output order, each with the
+  # constant gains the graph emits every step and the reference pose it has
+  # already added to its own output.
+  #
+  # Two entries are surprising and both are load-bearing. `waist_yaw_joint` is
+  # absent: the export drives waist roll and pitch but not yaw. And H2's ankle
+  # chain is roll before pitch, the reverse of the G1's, which the gains confirm
+  # by giving the roll pair the softer stiffness.
+  driven_joints:
+    - {joint: left_hip_pitch_joint, kp: 200.0, kd: 5.0, reference_pos: -0.1}
+    - {joint: right_hip_pitch_joint, kp: 200.0, kd: 5.0, reference_pos: -0.1}
+    - {joint: left_hip_roll_joint, kp: 200.0, kd: 5.0, reference_pos: 0.0}
+    - {joint: right_hip_roll_joint, kp: 200.0, kd: 5.0, reference_pos: 0.0}
+    - {joint: waist_roll_joint, kp: 300.0, kd: 5.0, reference_pos: 0.0}
+    - {joint: left_hip_yaw_joint, kp: 200.0, kd: 5.0, reference_pos: 0.0}
+    - {joint: right_hip_yaw_joint, kp: 200.0, kd: 5.0, reference_pos: 0.0}
+    - {joint: waist_pitch_joint, kp: 300.0, kd: 5.0, reference_pos: 0.0}
+    - {joint: left_knee_joint, kp: 300.0, kd: 8.0, reference_pos: 0.3}
+    - {joint: right_knee_joint, kp: 300.0, kd: 8.0, reference_pos: 0.3}
+    - {joint: left_ankle_roll_joint, kp: 20.0, kd: 0.5, reference_pos: 0.0}
+    - {joint: right_ankle_roll_joint, kp: 20.0, kd: 0.5, reference_pos: 0.0}
+    - {joint: left_ankle_pitch_joint, kp: 40.0, kd: 1.0, reference_pos: -0.2}
+    - {joint: right_ankle_pitch_joint, kp: 40.0, kd: 1.0, reference_pos: -0.2}

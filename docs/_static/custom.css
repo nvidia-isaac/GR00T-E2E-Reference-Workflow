@@ -1,0 +1,400 @@
+/*
+SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+SPDX-License-Identifier: Apache-2.0
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+*/
+
+:root {
+  --e2e-green: #76b900;
+  --e2e-green-dark: #477000;
+  --e2e-hero-bg: #e7e9ec;
+  --e2e-card-bg: #ffffff;
+  --e2e-card-border: #d7dbe0;
+  --e2e-card-muted: #f6f7f8;
+  --e2e-ink: #1f2328;
+  --e2e-muted: #59616b;
+  --e2e-diagram-data-bg: #edf4e3;
+  --e2e-diagram-node-border: #477000;
+}
+
+html[data-theme="dark"] {
+  --e2e-hero-bg: #252a30;
+  --e2e-card-bg: #1f242a;
+  --e2e-card-border: #454c55;
+  --e2e-card-muted: #292f36;
+  --e2e-ink: #f2f3f5;
+  --e2e-muted: #c1c6cc;
+  --e2e-diagram-data-bg: #26331c;
+  --e2e-diagram-node-border: #76b900;
+}
+
+.bd-page-width {
+  max-width: 96rem;
+}
+
+.bd-main .bd-content .bd-article-container {
+  max-width: 72rem;
+}
+
+@media (min-width: 960px) {
+  .bd-container__inner:has(.workflow-hero) .bd-sidebar-secondary {
+    display: none;
+  }
+
+  .bd-container__inner:has(.workflow-hero) .bd-content {
+    justify-content: center;
+  }
+}
+
+.workflow-hero {
+  background: var(--e2e-hero-bg);
+  border-radius: 0.35rem;
+  color: var(--e2e-ink);
+  margin: 0 0 3rem;
+  overflow: hidden;
+  padding: 2.8rem 3rem;
+}
+
+.bd-article > section:has(> .workflow-hero) > h1:first-child {
+  clip-path: inset(50%);
+  height: 1px;
+  overflow: hidden;
+  position: absolute;
+  white-space: nowrap;
+  width: 1px;
+}
+
+.workflow-hero-title {
+  color: var(--e2e-ink);
+  font-weight: 750;
+  font-size: clamp(2.25rem, 5vw, 3.5rem);
+  letter-spacing: -0.035em;
+  line-height: 1.05;
+  margin: 0.35rem 0 1.15rem;
+  max-width: 42rem;
+}
+
+.workflow-hero p:not(.workflow-eyebrow, .workflow-hero-title) {
+  color: var(--e2e-muted);
+  font-size: 1.08rem;
+  max-width: 42rem;
+}
+
+.workflow-eyebrow,
+.workflow-status {
+  color: var(--e2e-green-dark);
+  font-size: 0.72rem;
+  font-weight: 750;
+  letter-spacing: 0.12em;
+}
+
+html[data-theme="dark"] .workflow-eyebrow,
+html[data-theme="dark"] .workflow-status {
+  color: var(--e2e-green);
+}
+
+html[data-theme="dark"] .workflow-status-muted {
+  color: var(--e2e-muted);
+}
+
+.workflow-primary-button {
+  margin-top: 0.8rem;
+}
+
+.workflow-pipeline-mark {
+  align-items: center;
+  border: 1px solid var(--e2e-card-border);
+  border-radius: 1rem;
+  display: flex;
+  flex-wrap: nowrap;
+  gap: 0.35rem;
+  justify-content: center;
+  margin: 1.5rem auto 0;
+  min-height: 9.5rem;
+  padding: 1rem;
+}
+
+.workflow-pipeline-mark span {
+  background: var(--e2e-card-bg);
+  border: 2px solid var(--e2e-green);
+  border-radius: 50%;
+  display: grid;
+  font-size: 0.72rem;
+  font-weight: 750;
+  height: 3rem;
+  place-items: center;
+  width: 3rem;
+}
+
+.workflow-pipeline-mark b {
+  color: var(--e2e-green-dark);
+  font-size: 1rem;
+}
+
+.workflow-pipeline-mark p {
+  align-items: center;
+  display: flex;
+  flex-wrap: nowrap;
+  gap: 0.35rem;
+  margin: 0;
+}
+
+.bd-content .workflow-card,
+.bd-content .workflow-step-card {
+  background: var(--e2e-card-bg);
+  border-color: var(--e2e-card-border);
+  border-top: 3px solid var(--e2e-green);
+  color: var(--e2e-ink);
+  transition: border-color 120ms ease, transform 120ms ease;
+}
+
+.bd-content .workflow-card .sd-card-body,
+.bd-content .workflow-step-card .sd-card-body {
+  background: var(--e2e-card-bg);
+}
+
+.bd-content .workflow-card:hover,
+.bd-content .workflow-step-card:hover {
+  border-color: var(--e2e-green);
+  transform: translateY(-2px);
+}
+
+.workflow-card .sd-card-title,
+.workflow-step-card .sd-card-title {
+  font-weight: 700;
+}
+
+.workflow-featured-card .sd-card-title {
+  font-size: 1.45rem;
+}
+
+.bd-content .workflow-expansion-card {
+  border-style: dashed;
+  border-top-color: var(--e2e-card-border);
+}
+
+.bd-content .workflow-expansion-card .sd-card-body {
+  background: var(--e2e-card-muted);
+}
+
+.workflow-status {
+  display: inline-block;
+  margin-bottom: 0.65rem;
+}
+
+.workflow-status-muted {
+  color: var(--e2e-muted);
+}
+
+.workflow-step-card {
+  min-height: 10rem;
+  text-align: center;
+}
+
+.hf-asset-card {
+  min-height: 9.5rem;
+  text-align: center;
+}
+
+.hf-asset-card .sd-card-body {
+  align-items: center;
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+}
+
+.hf-asset-card code {
+  font-size: 0.72rem;
+  overflow-wrap: anywhere;
+}
+
+.hf-asset-card code .pre {
+  white-space: normal;
+}
+
+.hf-badge {
+  color: var(--e2e-green-dark);
+  font-size: 0.72rem;
+  font-weight: 750;
+  letter-spacing: 0.12em;
+}
+
+html[data-theme="dark"] .hf-badge {
+  color: var(--e2e-green);
+}
+
+.workflow-step-number {
+  align-items: center;
+  background: var(--e2e-green);
+  border-radius: 50%;
+  color: #111111;
+  display: inline-flex;
+  font-weight: 750;
+  height: 2rem;
+  justify-content: center;
+  margin-bottom: 0.5rem;
+  width: 2rem;
+}
+
+.bd-content .mermaid-container {
+  background: var(--e2e-card-muted);
+  border: 1px solid var(--e2e-card-border);
+  border-left: 3px solid var(--e2e-green);
+  border-radius: 0.35rem;
+  margin-bottom: 1.5rem;
+  padding: 3rem 1rem 1rem;
+}
+
+:is(.bd-content, .mermaid-fullscreen-modal) pre.mermaid {
+  background: transparent;
+  margin: 0;
+}
+
+:is(.bd-content, .mermaid-fullscreen-modal) pre.mermaid > svg {
+  filter: none !important;
+}
+
+.bd-content pre.mermaid > svg {
+  height: auto !important;
+  max-height: 38rem;
+}
+
+:is(.bd-content, .mermaid-fullscreen-modal) .mermaid .node rect,
+:is(.bd-content, .mermaid-fullscreen-modal) .mermaid .node polygon,
+:is(.bd-content, .mermaid-fullscreen-modal) .mermaid .node circle,
+:is(.bd-content, .mermaid-fullscreen-modal) .mermaid .node ellipse {
+  fill: var(--e2e-card-bg) !important;
+  stroke: var(--e2e-diagram-node-border) !important;
+  stroke-width: 2px !important;
+}
+
+:is(.bd-content, .mermaid-fullscreen-modal) .mermaid .node.data rect,
+:is(.bd-content, .mermaid-fullscreen-modal) .mermaid .node.data polygon,
+:is(.bd-content, .mermaid-fullscreen-modal) .mermaid .node.optional rect,
+:is(.bd-content, .mermaid-fullscreen-modal) .mermaid .node.optional polygon {
+  fill: var(--e2e-diagram-data-bg) !important;
+}
+
+:is(.bd-content, .mermaid-fullscreen-modal) .mermaid .node.optional rect,
+:is(.bd-content, .mermaid-fullscreen-modal) .mermaid .node.optional polygon {
+  stroke-dasharray: 5 3;
+}
+
+:is(.bd-content, .mermaid-fullscreen-modal) .mermaid .node.accent rect,
+:is(.bd-content, .mermaid-fullscreen-modal) .mermaid .node.accent polygon {
+  fill: var(--e2e-green) !important;
+  stroke: var(--e2e-green-dark) !important;
+}
+
+:is(.bd-content, .mermaid-fullscreen-modal) .mermaid .nodeLabel,
+:is(.bd-content, .mermaid-fullscreen-modal) .mermaid .nodeLabel p,
+:is(.bd-content, .mermaid-fullscreen-modal) .mermaid .label text,
+:is(.bd-content, .mermaid-fullscreen-modal) .mermaid .edgeLabel,
+:is(.bd-content, .mermaid-fullscreen-modal) .mermaid .edgeLabel p {
+  color: var(--e2e-ink) !important;
+  fill: var(--e2e-ink) !important;
+}
+
+:is(.bd-content, .mermaid-fullscreen-modal) .mermaid .node.accent .nodeLabel,
+:is(.bd-content, .mermaid-fullscreen-modal) .mermaid .node.accent .nodeLabel p {
+  color: #111111 !important;
+}
+
+:is(.bd-content, .mermaid-fullscreen-modal) .mermaid .flowchart-link {
+  stroke: var(--e2e-muted) !important;
+  stroke-width: 1.75px !important;
+}
+
+:is(.bd-content, .mermaid-fullscreen-modal) .mermaid marker path,
+:is(.bd-content, .mermaid-fullscreen-modal) .mermaid .arrowMarkerPath {
+  fill: var(--e2e-muted) !important;
+  stroke: var(--e2e-muted) !important;
+}
+
+:is(.bd-content, .mermaid-fullscreen-modal) .mermaid .edgeLabel rect,
+:is(.bd-content, .mermaid-fullscreen-modal) .mermaid .labelBkg {
+  fill: var(--e2e-card-muted) !important;
+  opacity: 1 !important;
+}
+
+:is(.bd-content, .mermaid-fullscreen-modal) .mermaid .edgeLabel p {
+  background: var(--e2e-card-muted) !important;
+}
+
+.bd-content .mermaid-fullscreen-btn {
+  background: var(--e2e-card-bg) !important;
+  border-color: var(--e2e-diagram-node-border) !important;
+  color: var(--e2e-ink) !important;
+  right: 0.65rem !important;
+  top: 0.65rem !important;
+}
+
+@media (min-width: 960px) and (max-width: 1240px) {
+  .bd-header .navbar-brand .logo__image {
+    display: none;
+  }
+
+  .bd-header .navbar-brand .logo__title {
+    font-size: 1rem;
+  }
+
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .bd-content .workflow-card,
+  .bd-content .workflow-step-card {
+    transition: none;
+  }
+
+  .bd-content .workflow-card:hover,
+  .bd-content .workflow-step-card:hover {
+    transform: none;
+  }
+}
+
+@media (max-width: 767.98px) {
+  html {
+    --pst-header-height: 4rem;
+  }
+
+  .bd-header .navbar-brand .logo__title {
+    font-size: 0.9rem;
+    line-height: 1.1;
+    max-width: min(14rem, calc(100vw - 10rem));
+    white-space: normal;
+  }
+
+  .workflow-hero {
+    padding: 2rem 1.35rem;
+  }
+
+  .workflow-pipeline-mark {
+    min-height: auto;
+    padding: 0.5rem;
+  }
+
+  .workflow-pipeline-mark p {
+    gap: 0.15rem;
+  }
+
+  .workflow-pipeline-mark span {
+    font-size: 0.62rem;
+    height: 2.5rem;
+    width: 2.5rem;
+  }
+
+  .workflow-pipeline-mark b {
+    font-size: 0.8rem;
+  }
+}

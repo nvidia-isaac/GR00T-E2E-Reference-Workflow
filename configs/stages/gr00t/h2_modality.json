@@ -1,0 +1,25 @@
+{
+  "state": {
+    "left_leg": {"start": 0, "end": 6, "original_key": "observation.state"},
+    "right_leg": {"start": 6, "end": 12, "original_key": "observation.state"},
+    "waist": {"start": 12, "end": 15, "original_key": "observation.state"},
+    "head": {"start": 15, "end": 17, "original_key": "observation.state"},
+    "left_arm": {"start": 17, "end": 24, "original_key": "observation.state"},
+    "right_arm": {"start": 24, "end": 31, "original_key": "observation.state"},
+    "left_hand": {"start": 31, "end": 53, "original_key": "observation.state"},
+    "right_hand": {"start": 53, "end": 75, "original_key": "observation.state"}
+  },
+  "action": {
+    "left_arm": {"start": 17, "end": 24, "original_key": "action"},
+    "right_arm": {"start": 24, "end": 31, "original_key": "action"},
+    "left_hand": {"start": 31, "end": 53, "original_key": "action"},
+    "right_hand": {"start": 53, "end": 75, "original_key": "action"},
+    "navigate_command": {"start": 0, "end": 3, "original_key": "teleop.navigate_command"}
+  },
+  "video": {
+    "ego_view": {"original_key": "observation.images.ego_view"}
+  },
+  "annotation": {
+    "human.task_description": {"original_key": "task_index"}
+  }
+}

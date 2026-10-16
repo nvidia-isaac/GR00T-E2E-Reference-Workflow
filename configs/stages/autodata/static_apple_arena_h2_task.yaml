@@ -1,0 +1,90 @@
+# Consumer-owned AutoData descriptor for right-hand H2 Arena recordings.
+
+name: h2_static_apple_arena_transfer
+description: H2 picks an apple off the table with its right hand and places it on the plate.
+algo: dexmimicgen
+
+generation_policy:
+  name: h2_static_apple_arena_transfer
+  seed: 1
+  num_trials: 1
+  guarantee_success: false
+  keep_failed: true
+  source_dataset_path: null
+  generation_path: null
+  task_name: null
+  use_skillgen: false
+  use_navigation_controller: false
+  select_src_per_subtask: false
+  select_src_per_arm: false
+  transform_first_robot_pose: false
+  interpolate_from_last_target_pose: true
+
+subtasks:
+  right:
+    - object_ref: pick_object
+      description: Approach and grasp the apple with the right hand.
+      subtask_term_signal: right_hand_holds_object
+      first_subtask_start_offset_range: [0, 0]
+      subtask_term_offset_range: [0, 0]
+      selection_strategy: nearest_neighbor_object
+      selection_strategy_kwargs: {nn_k: 3}
+      action_noise: 0.0
+      num_interpolation_steps: 0
+      num_fixed_steps: 0
+      apply_noise_during_interpolation: false
+    - object_ref: pick_object
+      description: Hand the apple from the right hand to the left hand.
+      subtask_term_signal: left_hand_holds_object
+      subtask_term_offset_range: [0, 0]
+      selection_strategy: nearest_neighbor_object
+      selection_strategy_kwargs: {nn_k: 3}
+      action_noise: 0.0
+      num_interpolation_steps: 3
+      num_fixed_steps: 0
+      apply_noise_during_interpolation: false
+    - object_ref: placement_target
+      description: Retreat while the left hand places the apple on the plate.
+      subtask_term_offset_range: [0, 0]
+      selection_strategy: nearest_neighbor_object
+      selection_strategy_kwargs: {nn_k: 3}
+      action_noise: 0.0
+      num_interpolation_steps: 3
+      num_fixed_steps: 0
+      apply_noise_during_interpolation: false
+  left:
+    - object_ref: pick_object
+      description: Receive the apple from the right hand.
+      subtask_term_signal: left_hand_holds_object
+      subtask_term_offset_range: [0, 0]
+      selection_strategy: nearest_neighbor_object
+      selection_strategy_kwargs: {nn_k: 3}
+      action_noise: 0.0
+      num_interpolation_steps: 0
+      num_fixed_steps: 0
+      apply_noise_during_interpolation: false
+    - object_ref: placement_target
+      description: Place the apple on the plate and release it.
+      subtask_term_offset_range: [0, 0]
+      selection_strategy: nearest_neighbor_object
+      selection_strategy_kwargs: {nn_k: 3}
+      action_noise: 0.0
+      num_interpolation_steps: 3
+      num_fixed_steps: 0
+      apply_noise_during_interpolation: false
+
+# Coordinate the handover in the apple frame, then recompute one shared transform
+# from the plate's live pose before the final placement pair starts.
+constraints:
+  - constraint_type: coordination
+    eef_subtask_constraint_tuple: [[right, 1], [left, 0]]
+    coordination_scheme: transform
+    coordination_scheme_pos_noise_scale: 0.0
+    coordination_scheme_rot_noise_scale: 0.0
+    coordination_synchronize_start: false
+  - constraint_type: coordination
+    eef_subtask_constraint_tuple: [[right, 2], [left, 1]]
+    coordination_scheme: transform
+    coordination_scheme_pos_noise_scale: 0.0
+    coordination_scheme_rot_noise_scale: 0.0
+    coordination_synchronize_start: true

@@ -1,0 +1,102 @@
+# SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+# SPDX-License-Identifier: Apache-2.0
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+default_record_profile: g1_isaaclab_pink_ik_static
+default_eval_profile: g1_isaaclab_pink_ik_static
+
+profiles:
+  - name: g1_isaaclab_pink_ik_static
+    robot: unitree_g1
+    status: active_today
+    description: >
+      Current standalone Isaac Lab recording path. XR retargeting drives the
+      upper body through Isaac Lab Pink IK while the lower body remains in a
+      fixed standing posture.
+    tags: [recording, static_base, isaaclab_native]
+    upper_body:
+      name: isaaclab_pink_ik
+      role: upper_body
+      kind: realtime_ik
+      status: active_today
+      runtime_dependency: isaaclab
+      command_space: xr_wrist_and_hand_targets
+      output_space: pink_ik_task_space_action
+      parameters:
+        controlled_regions: [arms, hands]
+        target_links: [left_wrist_yaw_link, right_wrist_yaw_link]
+    lower_body:
+      name: fixed_standing_posture
+      role: lower_body
+      kind: posture_hold
+      status: active_today
+      runtime_dependency: isaaclab
+      command_space: none
+      output_space: nominal_lower_body_joint_targets
+      parameters:
+        navigation_command: [0.0, 0.0, 0.0]
+        stabilizer_policy: none
+    composer:
+      name: isaaclab_pickplace_action_passthrough
+      output_action_space: pink_ik_task_space_action
+      waist_owner: upper_body
+      conflict_resolution: upper_body_wins
+      parameters:
+        canonical_dataset_action: joint_pos_target
+
+  - name: g1_pink_ik_agile_stabilized
+    robot: unitree_g1
+    status: planned
+    description: >
+      Intended static manipulation stack. Pink IK owns the upper-body
+      manipulation target, and an Agile lower-body stabilizer keeps G1 balanced
+      in place with zero navigation command.
+    tags: [recording, static_base, stabilized, planned]
+    upper_body:
+      name: isaaclab_pink_ik
+      role: upper_body
+      kind: realtime_ik
+      status: active_today
+      runtime_dependency: isaaclab
+      command_space: xr_wrist_and_hand_targets
+      output_space: upper_body_joint_targets
+      parameters:
+        controlled_regions: [arms, hands]
+        target_links: [left_wrist_yaw_link, right_wrist_yaw_link]
+    lower_body:
+      name: g1_agile_stabilizer
+      role: lower_body
+      kind: learned_stabilizer
+      status: planned
+      runtime_dependency: isaaclab
+      command_space: velocity_height_command
+      output_space: lower_body_joint_targets
+      parameters:
+        # First-party Isaac Lab AGILE locomotion policy (fetched from Nucleus by
+        # the locomanipulation action term). First-party entry points select
+        # robot.wbc_mode explicitly; the 4-D [vx, vy, wz, hip_height] command is
+        # part of the action vector.
+        policy: isaaclab_agile_locomotion
+        mode_setting: configs/robots/g1.yaml:recording.wbc_mode
+        navigation_command: [0.0, 0.0, 0.0]
+        base_height_command: nominal
+        torso_orientation_rpy_command: [0.0, 0.0, 0.0]
+    composer:
+      name: g1_upper_lower_joint_target_composer
+      output_action_space: g1_43d_joint_targets
+      waist_owner: lower_body
+      conflict_resolution: lower_body_wins
+      parameters:
+        canonical_dataset_action: joint_pos_target
+        preserve_upper_body_extra_joints: true

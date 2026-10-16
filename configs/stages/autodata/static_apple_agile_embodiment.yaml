@@ -1,0 +1,55 @@
+# SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+# SPDX-License-Identifier: Apache-2.0
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# Embodiment descriptor for the repository's free-base G1 static-apple task.
+#
+# The first 28 values match static_apple_embodiment.yaml. AGILE adds the four-value
+# lower-body command recorded by XR sessions run with `--wbc-mode agile`.
+#
+# Action vector layout (32-D):
+#   [0..3)    left EEF position [m]
+#   [3..7)    left EEF quaternion (x, y, z, w)
+#   [7..10)   right EEF position [m]
+#   [10..14)  right EEF quaternion (x, y, z, w)
+#   [14..28)  hand joint positions (14 DOF, interleaved L/R by URDF order)
+#   [28..32)  AGILE command [vel_x, vel_y, rot_vel_z, hip_height]
+#
+# AutoData transforms the EEF trajectories while copying the AGILE command through
+# unchanged, preserving the same pelvis motion used to record the demonstration.
+
+type: absolute_pose_whole_body_bimanual
+name: g1_static_apple_agile
+description: Unitree G1 transferring an apple with absolute-pose control and AGILE locomotion.
+
+eefs:
+  left:
+    pose_obs_keys:
+      pos: left_eef_pos
+      quat: left_eef_quat
+    gripper_action_indices: [0, 1, 2, 6, 7, 8, 12]
+
+  right:
+    pose_obs_keys:
+      pos: right_eef_pos
+      quat: right_eef_quat
+    gripper_action_indices: [3, 4, 5, 9, 10, 11, 13]
+
+action_layout:
+  left_pose_slice: [0, 7]
+  right_pose_slice: [7, 14]
+  hand_joints_slice: [14, 28]
+  canonicalize_quat: true
+  passthrough_channels:
+    body: [28, 32]

@@ -1,0 +1,149 @@
+# SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+# SPDX-License-Identifier: Apache-2.0
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+[build-system]
+requires = ["setuptools<82.0.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "e2e-robot-workflows"
+version = "0.1.0"
+description = "Standalone end-to-end robotics workflow reference app built on NVIDIA Isaac Lab."
+readme = "README.md"
+requires-python = ">=3.12,<3.13"
+license = "Apache-2.0"
+license-files = ["LICENSE", "NOTICE"]
+authors = [{ name = "Pulkit" }]
+dependencies = [
+  "PyYAML>=6.0,<7",
+  "loguru>=0.7,<1",
+]
+classifiers = [
+  "Programming Language :: Python :: 3.12",
+]
+
+[project.optional-dependencies]
+dev = [
+  "pre-commit==4.6.0",
+  "pytest==9.0.2",
+]
+converter = [
+  "h5py>=3.10,<4",
+  "numpy>=1.26,<3",
+  "pyarrow>=17,<23",
+  "imageio>=2.34,<3",
+  "imageio-ffmpeg>=0.5,<1",
+]
+gr00t = [
+  "msgpack==1.1.0",
+  "pyzmq==27.0.1",
+]
+autodata = []
+
+[dependency-groups]
+# Normal `uv run` commands install the simulator, host tools, and documentation
+# dependencies. CI jobs select only the groups needed for each environment.
+sim = [
+  "isaaclab[isaacsim,all]==3.0.0b2",
+  # CloudXR needs websockets>=14; Isaac Sim declares websockets==12.0 but runs
+  # fine on modern websockets (verified on 16.x), so we override that pin below.
+  "isaacteleop==1.3.131",
+  "torch==2.11.0",
+  "torchvision==0.26.0",
+  "pin==4.0.0",
+  # Isaac Sim 6.x needs pin-pink>=3.3; 3.4+ breaks Isaac Lab's pink_ik controller.
+  "pin-pink==3.3.0",
+  "qpsolvers==4.12.0",
+  "daqp==0.8.5",
+  "onnxruntime",
+]
+arena = [
+  # Isaac Lab Arena's own [project.dependencies] at the revision runtime.toml pins, minus
+  # Arena itself: its wheel ships no data files, so its code arrives as a source checkout
+  # (tools/fetch_arena_checkout.sh) while its dependencies are locked here. Arena declares
+  # the simulator in dependency groups, which a consumer never receives, so nothing here
+  # touches the Isaac Lab, Isaac Sim, or torch versions the rest of this file fixes.
+  "decorator>=4.0.2,<5",
+  "lightwheel-sdk",
+  "matplotlib",
+  "onnxruntime",
+  "openai>=2.0",
+  "pandas==2.2.3",
+  "pydantic>=2.0",
+  "pytest",
+  "sbi",
+  "scipy",
+  "typing_extensions",
+  "vuer[all]",
+]
+host-tools = [
+  "pre-commit==4.6.0",
+  "pytest==9.0.2",
+]
+docs = [
+  "myst-parser==5.1.0",
+  "nvidia-sphinx-theme==0.0.9.post1",
+  "sphinx==9.1.0",
+  "sphinx-copybutton==0.5.2",
+  "sphinx-design==0.7.0",
+  "sphinxcontrib-mermaid==2.1.0",
+]
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+"*" = ["*.license"]
+
+[[tool.uv.index]]
+name = "nvidia"
+url = "https://pypi.nvidia.com"
+explicit = false
+
+[[tool.uv.index]]
+# CUDA 12.8 wheels include Blackwell (sm_120).
+name = "pytorch-cu128"
+url = "https://download.pytorch.org/whl/cu128"
+explicit = true
+
+[tool.uv]
+# isaacsim-kernel pins websockets==12.0, but CloudXR needs >=14 and Isaac Sim
+# works fine on modern websockets (verified on 16.x). Override the over-strict
+# pin so both can be satisfied.
+override-dependencies = ["websockets>=14"]
+index-strategy = "unsafe-best-match"
+prerelease = "allow"
+python-preference = "only-managed"
+default-groups = ["sim", "host-tools", "arena", "docs"]
+
+[tool.uv.sources]
+torch = { index = "pytorch-cu128" }
+torchvision = { index = "pytorch-cu128" }
+
+[tool.ruff]
+line-length = 120
+target-version = "py312"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B"]
+
+[tool.ruff.lint.isort]
+combine-as-imports = true
+
+[tool.ruff.lint.per-file-ignores]
+# Pinocchio must warm up before AppLauncher, and simulator imports must follow app startup.
+"scripts/record_demos.py" = ["E402"]
+"scripts/replay_demos.py" = ["E402"]
+"scripts/locomotion_with_agile.py" = ["E402"]

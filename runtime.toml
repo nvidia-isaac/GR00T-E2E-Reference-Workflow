@@ -1,0 +1,61 @@
+# SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+# SPDX-License-Identifier: Apache-2.0
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+schema_version = 1
+
+[tested]
+platform = "linux x86_64"
+python = "3.12"
+isaaclab = "3.0.0b2"
+isaacsim = "6.0.0.1"
+isaaclab_arena = "0.3.0"
+isaaclab_arena_revision = "785c24cc43c90739ce6f2618d1531b80a4297f0f"
+isaac_gr00t_revision = "4b1dca9d88d2a0b9ea5a65aa61c82ff89f5c4f0e"
+# AutoData operations outside Arena use its provisioned interpreter. Arena generation
+# overlays the pinned checkout's Python sources into this repository's runtime so both
+# sides use one Isaac Lab. The revision pins that external source outside uv.lock.
+isaac_autodata = "0.1.0"
+isaac_autodata_revision = "c704f8aa07818bf76963de3b90fd89fc0d336948"
+static_apple_checkpoint_repository = "nvidia/GN1x-Tuned-Arena-G1-Static-PickNPlace"
+static_apple_checkpoint_revision = "db82a2a9a03f76ed37705abb5f130feef4896466"
+torch = "2.11.0+cu128"
+torchvision = "0.26.0+cu128"
+pin = "4.0.0"
+pin_pink = "3.3.0"
+qpsolvers = "4.12.0"
+daqp = "0.8.5"
+agile_policy_path = "Policies/Agile/agile_locomotion.pt"
+agile_policy_sha256 = "f04a58b834057eb1c9f38350dc12feaf929ff2cc7d5b75d2871e23811b775dde"
+# Arena's whole-body controller runs a different AGILE artifact than the built-in task's
+# checkpoint above: an ONNX export it downloads from the WBC-AGILE repository at a commit
+# it pins in-tree. Pinning Arena's revision already fixes that commit, so this records
+# which locomotion policy was tested and makes an Arena bump that changes it fail the pin
+# check instead of swapping the policy silently.
+arena_wbc_agile_policy_revision = "7259792cf10803aab814d101134d493d24c8f22f"
+
+# Published workflow artifacts. These pins identify downloads; GPU qualification
+# remains separate from publication and from the tested runtime above.
+
+[artifacts.g1]
+dataset_repository = "nvidia/GR00T-E2E-Reference-Workflow-SIM-G1-N1.7-AppletoPlate-Dataset"
+dataset_revision = "36234f4b48dad27f218d8e29ec7710ad5a90b48c"
+model_repository = "nvidia/GR00T-E2E-Reference-Workflow-SIM-G1-N1.7-AppletoPlate-Model"
+model_revision = "d3075997eb71095238324746f0507f5d707cd895"
+
+[artifacts.h2]
+dataset_repository = "nvidia/GR00T-E2E-Reference-Workflow-SIM-H2-N1.7-AppleHandoverPlate-Dataset"
+dataset_revision = "72ad851a5d0b845d368f031c744876613fb0b3c7"
+model_repository = "nvidia/GR00T-E2E-Reference-Workflow-SIM-H2-N1.7-AppleHandoverPlate-Model"
+model_revision = "13397daebd2c34986fc18820374a4a2d33861482"

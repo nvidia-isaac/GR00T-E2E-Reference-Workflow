@@ -1,0 +1,33 @@
+# SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+# SPDX-License-Identifier: Apache-2.0
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# Packages the Isaac AutoData interpreter needs beyond what its own conda_installer.sh provides.
+#
+# Install with `tools/launch_autodata.sh setup`, which also runs as a preflight check before every
+# other command so a missing or wrong version is reported rather than surfacing as a crash deep in
+# the simulation.
+#
+# The two solver pins deliberately override what AutoData's Isaac Lab distribution declares, so pip
+# reports them as conflicts. Its declared daqp does not work at runtime, and its declared Pink is
+# not the one this repository records and evaluates with.
+
+# Isaac Lab's Pink IK passes warm-start arguments through qpsolvers that 0.7.2 rejects, and it
+# raises rather than falling back, so the G1 cannot be stepped at all on the older version.
+daqp==0.8.5
+# Match the Pink version runtime.toml pins, so generated trajectories are solved by the same IK
+# that recording and evaluation use. Verified behaviour-neutral on AutoData's own G1 example.
+pin-pink==3.3.0
+# Imported by this repository's env cfg, which AutoData builds when driving our task.
+loguru==0.7.3

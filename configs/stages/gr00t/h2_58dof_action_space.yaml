@@ -1,0 +1,75 @@
+# SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+# SPDX-License-Identifier: Apache-2.0
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+joints:
+  left_shoulder_pitch_joint: 0
+  left_shoulder_roll_joint: 1
+  left_shoulder_yaw_joint: 2
+  left_elbow_joint: 3
+  left_wrist_roll_joint: 4
+  left_wrist_pitch_joint: 5
+  left_wrist_yaw_joint: 6
+  right_shoulder_pitch_joint: 7
+  right_shoulder_roll_joint: 8
+  right_shoulder_yaw_joint: 9
+  right_elbow_joint: 10
+  right_wrist_roll_joint: 11
+  right_wrist_pitch_joint: 12
+  right_wrist_yaw_joint: 13
+  left_thumb_CMC_FE: 14
+  left_index_MCP_FE: 15
+  left_middle_MCP_FE: 16
+  left_ring_MCP_FE: 17
+  left_pinky_CMC: 18
+  right_thumb_CMC_FE: 19
+  right_index_MCP_FE: 20
+  right_middle_MCP_FE: 21
+  right_ring_MCP_FE: 22
+  right_pinky_CMC: 23
+  left_thumb_CMC_AA: 24
+  left_index_MCP_AA: 25
+  left_middle_MCP_AA: 26
+  left_ring_MCP_AA: 27
+  left_pinky_MCP_FE: 28
+  right_thumb_CMC_AA: 29
+  right_index_MCP_AA: 30
+  right_middle_MCP_AA: 31
+  right_ring_MCP_AA: 32
+  right_pinky_MCP_FE: 33
+  left_thumb_MCP_FE: 34
+  left_index_PIP: 35
+  left_middle_PIP: 36
+  left_ring_PIP: 37
+  left_pinky_MCP_AA: 38
+  right_thumb_MCP_FE: 39
+  right_index_PIP: 40
+  right_middle_PIP: 41
+  right_ring_PIP: 42
+  right_pinky_MCP_AA: 43
+  left_thumb_MCP_AA: 44
+  left_index_DIP: 45
+  left_middle_DIP: 46
+  left_ring_DIP: 47
+  left_pinky_PIP: 48
+  right_thumb_MCP_AA: 49
+  right_index_DIP: 50
+  right_middle_DIP: 51
+  right_ring_DIP: 52
+  right_pinky_PIP: 53
+  left_thumb_IP: 54
+  left_pinky_DIP: 55
+  right_thumb_IP: 56
+  right_pinky_DIP: 57
+total_joints: 58

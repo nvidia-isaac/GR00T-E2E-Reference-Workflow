@@ -1,0 +1,4 @@
+[
+  {"version": "main", "name": "main (development)", "ref": "main", "path": ""},
+  {"version": "v0.2", "name": "v0.2 (release branch)", "ref": "release/v0.2", "path": "v0-2"}
+]
