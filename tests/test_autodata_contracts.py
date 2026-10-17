@@ -371,7 +371,9 @@ def test_launcher_keeps_camera_free_native_generation_supported(tmp_path: Path, 
     assert result.stderr.strip() == f"No Isaac AutoData checkout at {missing_autodata}; pass --autodata-root."
 
 
-def test_provision_accepts_an_existing_linked_worktree(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+def test_provision_uses_a_linked_worktree_without_user_site_packages(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
     source = tmp_path / "autodata-source"
     source.mkdir()
     (source / "scripts").mkdir()
@@ -396,9 +398,21 @@ def test_provision_accepts_an_existing_linked_worktree(tmp_path: Path, monkeypat
     fake_uv.write_text(f"#!/usr/bin/env bash\nprintf '%s\\n' '{revision}'\n", encoding="utf-8")
     fake_uv.chmod(0o755)
     fake_python = tmp_path / "python"
-    fake_python.write_text("#!/usr/bin/env bash\nexit 0\n", encoding="utf-8")
+    fake_python.write_text(f"#!{sys._base_executable}\n", encoding="utf-8")
     fake_python.chmod(0o755)
     monkeypatch.setenv("UV_BIN", str(fake_uv))
+    monkeypatch.setenv("PYTHONUSERBASE", str(tmp_path / "user-base"))
+    monkeypatch.delenv("PYTHONNOUSERSITE", raising=False)
+    python = sys._base_executable
+    user_site = Path(subprocess.check_output([python, "-m", "site", "--user-site"], text=True).strip())
+    user_site.mkdir(parents=True)
+    marker = tmp_path / "user-site-loaded"
+    (user_site / "usercustomize.py").write_text(
+        f"from pathlib import Path\nPath({str(marker)!r}).touch()\n", encoding="utf-8"
+    )
+    subprocess.run([str(fake_python)], check=True)
+    assert marker.exists()
+    marker.unlink()
 
     result = subprocess.run(
         [
@@ -418,6 +432,7 @@ def test_provision_accepts_an_existing_linked_worktree(tmp_path: Path, monkeypat
     assert result.returncode == 0, result.stderr
     assert "Cloning Isaac AutoData" not in result.stdout
     assert "Checking out the pinned AutoData revision" in result.stdout
+    assert not marker.exists(), "Provisioning imported packages from the Python user site"
 
 
 def test_launcher_absolutizes_caller_supplied_paths() -> None:

@@ -80,6 +80,9 @@ base-height fields and needs custom training and evaluation integration.
    ./tools/launch_autodata.sh provision
    ```
 
+   The launcher sets `PYTHONNOUSERSITE=1` for all commands to prevent user-site
+   packages from shadowing the environment.
+
    The default checkout is the sibling `Isaac-AutoData-e2e` and the Conda
    environment is `isaac_autodata`. Use `--autodata-root` or
    `ISAAC_AUTODATA_ROOT` for another checkout; use `--autodata-python` or

@@ -19,9 +19,8 @@
 # other command so a missing or wrong version is reported rather than surfacing as a crash deep in
 # the simulation.
 #
-# The two solver pins deliberately override what AutoData's Isaac Lab distribution declares, so pip
-# reports them as conflicts. Its declared daqp does not work at runtime, and its declared Pink is
-# not the one this repository records and evaluates with.
+# Pink deliberately overrides what AutoData's pinned Isaac Lab distribution declares, so pip
+# reports it as a conflict. DAQP matches that distribution's requirement.
 
 # Isaac Lab's Pink IK passes warm-start arguments through qpsolvers that 0.7.2 rejects, and it
 # raises rather than falling back, so the G1 cannot be stepped at all on the older version.

@@ -21,7 +21,8 @@ Reads image observations (e.g. ``robot_head_cam_rgb``) out of a ``record_demos.p
 HDF5 dataset and writes one MP4 per (demo, camera) into an output directory, without
 launching the simulator. Adapted from Isaac Lab's ``scripts/tools/hdf5_to_mp4.py`` to
 use ``imageio`` (the ``converter`` extra) instead of OpenCV, and to default to this
-project's head camera rather than the Arena table/wrist cameras.
+project's head camera rather than the Arena table/wrist cameras. Supports camera
+streams stored under either ``obs/`` (native Isaac Lab) or ``camera_obs/`` (Arena).
 
 Videos are named ``demo_<id>_<camera>.mp4`` so ``scripts/mp4_to_hdf5.py`` can match
 them back to their source demo.
@@ -57,7 +58,7 @@ def parse_args() -> argparse.Namespace:
         type=str,
         nargs="+",
         default=DEFAULT_CAMERA_KEYS,
-        help="Camera observation keys under obs/ to export (default: robot_head_cam_rgb).",
+        help="Camera observation keys under obs/ or camera_obs/ to export (default: robot_head_cam_rgb).",
     )
     parser.add_argument(
         "--framerate", type=int, default=DEFAULT_FRAMERATE, help="Frames per second for the output video."
@@ -95,11 +96,14 @@ def _to_uint8_rgb(frame: np.ndarray) -> np.ndarray:
 
 def write_demo_to_mp4(hdf5_file: h5py.File, demo_name: str, input_key: str, output_dir: str, framerate: int) -> bool:
     """Write one demo's frames for ``input_key`` to an MP4. Returns False if absent."""
-    obs_path = f"data/{demo_name}/obs/{input_key}"
-    if obs_path not in hdf5_file:
+    # Prefer the native layout when a camera exists in both groups.
+    for group in ("obs", "camera_obs"):
+        frames = hdf5_file.get(f"data/{demo_name}/{group}/{input_key}")
+        if isinstance(frames, h5py.Dataset):
+            break
+    else:
         return False
 
-    frames = hdf5_file[obs_path]
     output_path = os.path.join(output_dir, f"{demo_name}_{input_key}.mp4")
     with imageio.get_writer(output_path, fps=framerate, macro_block_size=None) as writer:
         for frame in frames:
@@ -139,7 +143,9 @@ def main() -> None:
                 wrote_any |= write_demo_to_mp4(f, demo_name, input_key, args.output_dir, args.framerate)
 
     if not wrote_any:
-        raise SystemExit(f"No frames written; none of {args.input_keys} exist under any demo's obs group.")
+        raise SystemExit(
+            f"No frames written; none of {args.input_keys} exist under any demo's obs or camera_obs group."
+        )
 
 
 if __name__ == "__main__":

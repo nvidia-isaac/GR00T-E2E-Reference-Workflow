@@ -167,3 +167,63 @@ def test_merge_rejects_output_path_as_input(tmp_path: Path) -> None:
     result = _run(MERGE, "-o", str(out), str(a), str(out))
     assert result.returncode == 2
     assert "equals an input path" in result.stderr
+
+
+@pytest.mark.parametrize("camera_group", ["obs", "camera_obs"])
+def test_mp4_export_camera_layouts(tmp_path: Path, camera_group: str) -> None:
+    pytest.importorskip("imageio")
+    import imageio.v2 as imageio
+
+    src, vids = tmp_path / "src.hdf5", tmp_path / "vids"
+    with h5py.File(src, "w") as f:
+        # Match the reported Arena recording's frame count and resolution.
+        f.create_dataset(
+            f"data/demo_0/{camera_group}/{CAMERA_KEY}",
+            data=np.full((129, 480, 640, 3), 90, dtype=np.uint8),
+        )
+
+    result = _run(HDF5_TO_MP4, "--input_file", str(src), "--output_dir", str(vids))
+    assert result.returncode == 0, result.stderr
+    with imageio.get_reader(vids / f"demo_0_{CAMERA_KEY}.mp4") as reader:
+        assert reader.count_frames() == 129
+        frame = reader.get_data(0)
+        assert frame.shape == (480, 640, 3)
+        np.testing.assert_allclose(frame, 90, atol=3)
+
+
+def test_mp4_export_mixed_layouts_and_custom_key(tmp_path: Path) -> None:
+    pytest.importorskip("imageio")
+    import imageio.v2 as imageio
+
+    src, vids = tmp_path / "src.hdf5", tmp_path / "vids"
+    with h5py.File(src, "w") as f:
+        for index, group in enumerate(("obs", "camera_obs")):
+            f.create_dataset(
+                f"data/demo_{index}/{group}/wrist_rgb",
+                data=np.full((4, 16, 16, 3), 90 + 30 * index, dtype=np.uint8),
+            )
+        # Another camera in obs must not hide the requested Arena stream.
+        f.create_dataset(f"data/demo_1/obs/{CAMERA_KEY}", shape=(4, 16, 16, 3), dtype="u1")
+        # Preserve the existing obs precedence when both layouts have the key.
+        f.create_dataset("data/demo_0/camera_obs/wrist_rgb", shape=(7, 16, 16, 3), dtype="u1")
+
+    result = _run(HDF5_TO_MP4, "--input_file", str(src), "--output_dir", str(vids), "--input_keys", "wrist_rgb")
+    assert result.returncode == 0, result.stderr
+    assert sorted(p.name for p in vids.glob("*.mp4")) == [f"demo_{i}_wrist_rgb.mp4" for i in range(2)]
+    for index in range(2):
+        with imageio.get_reader(vids / f"demo_{index}_wrist_rgb.mp4") as reader:
+            assert reader.count_frames() == 4
+            np.testing.assert_allclose(reader.get_data(0), 90 + 30 * index, atol=3)
+
+
+def test_mp4_export_missing_camera_reports_both_layouts(tmp_path: Path) -> None:
+    pytest.importorskip("imageio")
+    src, vids = tmp_path / "src.hdf5", tmp_path / "vids"
+    with h5py.File(src, "w") as f:
+        f.create_group("data/demo_0/obs")
+        f.create_group("data/demo_0/camera_obs")
+
+    result = _run(HDF5_TO_MP4, "--input_file", str(src), "--output_dir", str(vids))
+    assert result.returncode != 0
+    assert "obs or camera_obs" in result.stderr
+    assert not list(vids.glob("*.mp4"))

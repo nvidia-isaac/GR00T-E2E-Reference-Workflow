@@ -16,6 +16,9 @@
 
 set -euo pipefail
 
+# User-site packages can shadow the pinned environment.
+export PYTHONNOUSERSITE=1
+
 # Runs Isaac AutoData against a pinned external checkout.
 #
 # Commands outside Arena use AutoData's provisioned interpreter. Arena generation overlays
@@ -373,7 +376,7 @@ PYTHON
   fi
 
   if [[ "${COMMAND}" == "setup" ]]; then
-    echo "The AutoData interpreter satisfies $(basename "${REQUIREMENTS}")."
+    echo "AutoData integration extras are installed ($(basename "${REQUIREMENTS}"))."
     exit 0
   fi
 fi
