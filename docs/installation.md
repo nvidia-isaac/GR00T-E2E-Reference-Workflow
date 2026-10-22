@@ -85,7 +85,7 @@ Check the GPU and driver:
 nvidia-smi --query-gpu=name,memory.total,driver_version --format=csv
 ```
 
-Network access is required to the source project, Python package indexes, GitHub,
+Network access is required to NVIDIA GitLab, Python package indexes, GitHub,
 simulator assets, and Hugging Face. Training requires access to the gated model
 repositories described in [Model Access](how-to/fine-tune-gr00t.md#model-access).
 For XR recording, also prepare the [headset and network](#xr-recording-requirements)
@@ -113,11 +113,9 @@ Install [Git](https://git-scm.com/downloads) and
 [uv](https://docs.astral.sh/uv/getting-started/installation/)
 using their installation instructions before cloning the repository.
 
-
 ## Clone the Repository
 
-These instructions select @@DOCS_REF@@. The documentation source commit is @@DOCS_COMMIT@@.
-
+These instructions select @@DOCS_REF@@.
 
 Choose a workspace with enough free space; the example uses
 `~/robot-workflows`.
@@ -125,10 +123,14 @@ Run each command below in order in the same terminal.
 
 @@DOCS_CHECKOUT@@
 
-Keep the printed commit ID with your run results. To match this documentation
-exactly, check out its displayed source commit with
-`git checkout --detach <full-commit-id>`.
+Keep the printed commit ID with your run results. To reproduce a specific
+revision, replace
+`<tag-or-commit>` below with a tag or commit available in the cloned GitHub
+repository:
 
+```bash
+git checkout --detach <tag-or-commit>
+```
 
 This repository has no Git submodules to initialize. Model weights and datasets
 are downloaded separately by their workflow stages.
@@ -140,7 +142,7 @@ for example `~/robot-workflows/Isaac-GR00T`. It has its own environment. Follow
 
 ## Create and Check the Simulation Environment
 
-From the `e2e-reference-app` directory:
+From the `GR00T-E2E-Reference-Workflow` directory:
 
 ```bash
 uv sync --frozen

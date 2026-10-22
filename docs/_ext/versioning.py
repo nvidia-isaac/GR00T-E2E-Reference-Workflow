@@ -20,7 +20,7 @@ import os
 import re
 import shlex
 import subprocess
-from dataclasses import asdict, dataclass
+from dataclasses import asdict, dataclass, replace
 from pathlib import Path
 from urllib.parse import urlsplit, urlunsplit
 
@@ -159,27 +159,48 @@ def resolve_context(env, repository, catalog, provider="gitlab"):
 
 def checkout_block(context, clone_url, provider="gitlab"):
     """Generate checkout commands for the selected ref or exact preview revision."""
-    commands = ["mkdir -p ~/robot-workflows", "cd ~/robot-workflows"]
+    directory = shlex.quote(Path(urlsplit(clone_url).path).name.removesuffix(".git"))
+    steps = [
+        ("Create a workspace directory", "mkdir -p ~/robot-workflows"),
+        ("Enter the workspace directory", "cd ~/robot-workflows"),
+    ]
     if context.kind == "preview":
-        commands.extend(
+        steps.extend(
             [
-                f"git clone --no-checkout {shlex.quote(clone_url)} e2e-reference-app",
-                "cd e2e-reference-app",
-                f"git fetch origin {context.sha}",
-                f"git checkout --detach {context.sha}",
+                (
+                    "Clone the repository without selecting a branch",
+                    f"git clone --no-checkout {shlex.quote(clone_url)}",
+                ),
+                ("Enter the repository", f"cd {directory}"),
+                ("Fetch the documentation source commit", f"git fetch origin {context.sha}"),
+                ("Check out the documentation source commit", f"git checkout --detach {context.sha}"),
             ]
         )
     else:
-        commands.extend(
+        clone_command = f"git clone --branch {shlex.quote(context.ref)} \\\n  {shlex.quote(clone_url)}"
+        steps.extend(
             [
-                f"git clone --branch {shlex.quote(context.ref)} \\\n  {shlex.quote(clone_url)} \\\n  e2e-reference-app",
-                "cd e2e-reference-app",
+                (
+                    "Clone the selected documentation branch",
+                    clone_command,
+                ),
+                ("Enter the repository", f"cd {directory}"),
             ]
         )
     if provider == "gitlab":
-        commands.extend(["git lfs install --local", "git lfs pull"])
-    commands.append("git rev-parse HEAD")
-    return "\n\n".join(f"```bash\n{command}\n```" for command in commands)
+        steps.extend(
+            [
+                ("Enable Git LFS for this checkout", "git lfs install --local"),
+                ("Download the documentation images", "git lfs pull"),
+            ]
+        )
+    steps.append(("Print the checked-out source commit", "git rev-parse HEAD"))
+
+    rendered_steps = []
+    for number, (description, command) in enumerate(steps, start=1):
+        indented_command = "\n".join(f"   {line}" for line in command.splitlines())
+        rendered_steps.append(f"{number}. {description}:\n\n   ```bash\n{indented_command}\n   ```")
+    return "\n\n".join(rendered_steps)
 
 
 def configure(app, config):
@@ -190,13 +211,6 @@ def configure(app, config):
             if entry["version"] == "main":
                 entry["name"] = "main (latest published)"
     context = resolve_context(os.environ, Path(app.confdir).parent, catalog, config.docs_repository_provider)
-    if os.environ.get("DOCS_PREPUBLICATION") == "1":
-        if config.docs_repository_provider != "github" or not context.sha:
-            raise ValueError("Prepublication link checking requires a GitHub build with a commit SHA")
-        config.linkcheck_ignore = [
-            *config.linkcheck_ignore,
-            re.escape(f"{config.docs_project_url}/commit/{context.sha}") + "$",
-        ]
     app.docs_context = context
     config.version = context.version
     config.release = context.sha
@@ -230,16 +244,14 @@ def render_checkout(app, docname, source):
         return
     context = app.docs_context
     provider = app.config.docs_repository_provider
+    if provider == "github" and (
+        context.kind in {"preview", "unpublished"}
+        or (context.kind == "candidate" and os.environ.get("GITHUB_ACTIONS") != "true")
+    ):
+        context = replace(context, kind="development", ref="main")
     ref = f"commit `{context.sha}` from `{context.ref}`" if context.kind == "preview" else f"`{context.ref}`"
-    commit_path = "commit" if provider == "github" else "-/commit"
-    commit = (
-        f"[{context.sha}]({app.config.docs_project_url}/{commit_path}/{context.sha})"
-        if context.sha
-        else "unavailable in this local build"
-    )
     for marker, value in (
         ("@@DOCS_REF@@", ref),
-        ("@@DOCS_COMMIT@@", commit),
         ("@@DOCS_CHECKOUT@@", checkout_block(context, app.config.docs_clone_url, provider)),
     ):
         if source[0].count(marker) != 1:

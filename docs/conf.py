@@ -22,7 +22,7 @@ sys.path.insert(0, str(Path(__file__).parent / "_ext"))
 
 docs_repository_provider = "github"
 docs_project_url = "https://github.com/nvidia-isaac/GR00T-E2E-Reference-Workflow"
-docs_clone_url = "https://github.com/nvidia-isaac/GR00T-E2E-Reference-Workflow.git"
+docs_clone_url = f"{docs_project_url}.git"
 
 project = "GR00T E2E Reference Workflow"
 author = "NVIDIA Corporation"

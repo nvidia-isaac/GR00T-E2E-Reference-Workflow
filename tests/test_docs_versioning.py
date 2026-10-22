@@ -137,8 +137,43 @@ def github_context(kind, ref, prefix, **extra):
                 GITHUB_HEAD_REF="feature/docs",
             ),
             "PR #123 (preview)",
-            f"git checkout --detach {SHA}",
+            "git clone --branch main",
             "pr-123/",
+        ),
+        (
+            "github",
+            ci_context(
+                "preview",
+                "feature/docs",
+                "mr-123",
+                CI_PIPELINE_SOURCE="merge_request_event",
+                CI_MERGE_REQUEST_IID="123",
+                CI_MERGE_REQUEST_SOURCE_BRANCH_NAME="feature/docs",
+            ),
+            "MR !123 (preview)",
+            "git clone --branch main",
+            "mr-123/",
+        ),
+        (
+            "github",
+            ci_context("unpublished", "feature/docs", "", CI_PIPELINE_SOURCE="web"),
+            "feature/docs (unpublished)",
+            "git clone --branch main",
+            None,
+        ),
+        (
+            "github",
+            ci_context("candidate", "rc3", "rc3", CI_COMMIT_TAG="rc3", CI_COMMIT_BRANCH=""),
+            "rc3 (snapshot)",
+            "git clone --branch main",
+            "rc3/",
+        ),
+        (
+            "github",
+            github_context("candidate", "rc5", "rc5", GITHUB_REF_TYPE="tag"),
+            "rc5 (snapshot)",
+            "git clone --branch rc5",
+            "rc5/",
         ),
         ("github", {}, "Local build", "git clone --branch main", None),
     ],
@@ -211,7 +246,7 @@ def test_rendered_documentation_matches_source(tmp_path, provider, environment, 
     for setup_command in (
         "mkdir -p ~/robot-workflows",
         "cd ~/robot-workflows",
-        "cd e2e-reference-app",
+        "cd GR00T-E2E-Reference-Workflow",
         "git rev-parse HEAD",
     ):
         assert setup_command in copied_commands
@@ -225,13 +260,17 @@ def test_rendered_documentation_matches_source(tmp_path, provider, environment, 
     assert info["sha"] == expected_sha
     if expected_sha:
         assert info["ref"] == environment.get("DOCS_REF", "main")
-        assert f"source commit is {expected_sha}" in text
-        commit_path = "/-/commit/" if provider == "gitlab" else "/commit/"
-        assert f"{commit_path}{expected_sha}" in rendered
-        if provider == "github":
-            assert f"/-/commit/{expected_sha}" not in rendered
-    else:
-        assert "source commit is unavailable in this local build" in text
+    assert "documentation-source-commit" not in text
+    assert "source commit is" not in text
+    assert "https://github.com/nvidia-isaac/GR00T-E2E-Reference-Workflow.git" in text
+    assert 'class="fa-brands fa-github' in rendered
+    assert "From the GR00T-E2E-Reference-Workflow directory:" in text
+    if provider == "github":
+        if expected_sha:
+            assert expected_sha not in text
+        assert "git fetch origin" not in text
+        if environment.get("DOCS_KIND") in {"preview", "unpublished"}:
+            assert "These instructions select main." in text
     if prefix is not None:
         assert f"https://example.org/project/docs/{prefix}installation.html" in rendered
         assert info["site_url"] == f"https://example.org/project/docs/{prefix}"
@@ -284,6 +323,21 @@ def test_inconsistent_release_context_is_rejected(monkeypatch, provider, changes
         versioning.resolve_context(
             {**context("release", "release/v0.2", "v0-2"), **changes}, REPOSITORY, catalog, provider
         )
+
+
+def test_checkout_commands_are_numbered(monkeypatch):
+    """Present checkout commands as an ordered procedure."""
+    monkeypatch.syspath_prepend(str(REPOSITORY / "docs" / "_ext"))
+    versioning = importlib.import_module("versioning")
+    catalog = versioning.read_catalog(REPOSITORY / "docs" / "versions.json")
+    context = versioning.resolve_context(ci_context("development", "main", ""), REPOSITORY, catalog)
+
+    block = versioning.checkout_block(context, "ssh://example.org/repo.git")
+    numbered_steps = [line for line in block.splitlines() if re.fullmatch(r"[1-9][0-9]*\. .+:", line)]
+
+    assert len(numbered_steps) == 7
+    assert numbered_steps[0] == "1. Create a workspace directory:"
+    assert numbered_steps[-1] == "7. Print the checked-out source commit:"
 
 
 def test_future_release_can_build_before_catalog_registration(monkeypatch):
