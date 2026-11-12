@@ -245,7 +245,7 @@ def test_gr00t_evaluation_reuses_the_pinned_arena_client_contract() -> None:
     assert "--model-path=*" in server_launcher
     assert runtime["isaac_gr00t_revision"] == "4b1dca9d88d2a0b9ea5a65aa61c82ff89f5c4f0e"
     assert project["project"]["optional-dependencies"]["gr00t"] == [
-        "msgpack==1.1.0",
+        "msgpack==1.2.3",
         "pyzmq==27.0.1",
     ]
 

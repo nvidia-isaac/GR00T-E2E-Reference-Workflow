@@ -37,7 +37,7 @@ classifiers = [
 [project.optional-dependencies]
 dev = [
   "pre-commit==4.6.0",
-  "pytest==9.0.2",
+  "pytest==9.1.1",
 ]
 converter = [
   "h5py>=3.10,<4",
@@ -47,7 +47,7 @@ converter = [
   "imageio-ffmpeg>=0.5,<1",
 ]
 gr00t = [
-  "msgpack==1.1.0",
+  "msgpack==1.2.3",
   "pyzmq==27.0.1",
 ]
 autodata = []
@@ -90,7 +90,7 @@ arena = [
 ]
 host-tools = [
   "pre-commit==4.6.0",
-  "pytest==9.0.2",
+  "pytest==9.1.1",
 ]
 docs = [
   "myst-parser==5.1.0",

@@ -15,12 +15,6 @@
 
 # Unitree H2 Plus defaults for the Arena AGILE/Pink path.
 #
-# The AGILE export names no joints, states no control rate, and identifies no
-# platform. Everything under `agile:` was recovered by probing the graph rather
-# than read from a sidecar, so each value carries its provenance below. The
-# recovery itself is recorded in the eng-ledger under
-# `projects/dirt/experiments/h2-agile-ports`.
-#
 # The plant is exclusively owned by configs/robots/h2_pink.yaml. The gated
 # checkpoint remains an environment input, but its Hub provenance and content
 # identity are pinned here.

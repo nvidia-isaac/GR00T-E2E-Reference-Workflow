@@ -44,7 +44,7 @@ standing:
     .*_ankle_roll_joint: 0.0
   base_leg_joint_patterns: [".*_hip_.*", ".*_knee_.*", ".*_ankle_.*"]
 
-usd: "omniverse://isaac-dev.ov.nvidia.com/Projects/GR00T_E2E_RA/assets/robot_library/g1/g1.usd"
+usd: "https://omniverse-content-production.s3-us-west-2.amazonaws.com/Assets/Isaac/6.0/Isaac/Samples/Groot/Robots/g1_29dof_with_hand_rev_1_0.usd"
 
 head_camera:
   prim: head_link/RobotHeadCam

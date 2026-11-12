@@ -167,6 +167,27 @@ def test_environment_digest_is_stable_and_cwd_independent(tmp_path: Path) -> Non
     assert result.stdout.strip() == expected
 
 
+def test_asset_mirror_preserves_layout_and_identity(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
+    environment = STATIC_APPLE_ENVIRONMENT
+    monkeypatch.delenv("E2E_ASSET_ROOT", raising=False)
+    default_paths = [asset.usd_path for asset in environment.assets]
+    digest = environment.contract_digest
+    snapshot = environment.contract_snapshot()
+    for asset in environment.assets:
+        path = tmp_path / asset.usd_relpath
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_text(asset.role, encoding="utf-8")
+
+    monkeypatch.setenv("E2E_ASSET_ROOT", f"{tmp_path}/")
+    for asset in environment.assets:
+        assert Path(asset.usd_path).read_text(encoding="utf-8") == asset.role
+    assert environment.contract_digest == digest
+    assert environment.contract_snapshot() == snapshot
+
+    monkeypatch.setenv("E2E_ASSET_ROOT", "")
+    assert [asset.usd_path for asset in environment.assets] == default_paths
+
+
 def test_placement_thresholds_are_in_the_digest_and_snapshot() -> None:
     environment = STATIC_APPLE_ENVIRONMENT
     snapshot = environment.contract_snapshot()["task"]

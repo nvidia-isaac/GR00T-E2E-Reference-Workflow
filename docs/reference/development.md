@@ -59,6 +59,36 @@ uv sync --frozen --no-default-groups --extra dev --extra converter
 software versions and model revisions, and `tools/validate_repository.sh` owns the validation
 commands.
 
+## Simulation Assets
+
+The static-apple scenes load versioned NVIDIA Isaac Sim assets over public HTTPS.
+Scene loading requires network access but no asset-server login. Unitree G1 and
+Unitree H2 share the warehouse, table, apple, and plate assets. The G1 robot uses
+its own public USD configured in `configs/robots/g1.yaml`.
+
+Set `E2E_ASSET_ROOT` to use a collected library mirror instead of the public
+scene assets. The mirror must retain these directories and entry points,
+including their referenced resources:
+
+- `background_library/warehouse/`: `warehouse.usd`
+- `object_library/table/`: `table.usd`
+- `object_library/apple/`: `apple.usd`
+- `object_library/clay_plate/`: `clay_plate.usd`
+
+These library-relative names are independent of the public filenames.
+An unset or empty variable selects the public defaults.
+
+The robot is configured separately: `E2E_ASSET_ROOT` does not change the G1 USD.
+To select a different robot USD, set `E2E_G1_ROBOT_CONFIG` to a complete G1 YAML
+configuration with that USD in its `usd` field.
+
+The public G1 USD uses its default white materials. Public transport URLs and
+`E2E_ASSET_ROOT` are excluded from the environment contract digest. Library-relative
+asset paths (`usd_relpath`) remain included. Matching contracts therefore do not
+prove matching visual appearance. Keep the recording manifest's
+`repository.revision` and the selected robot and scene URLs with each dataset to
+distinguish asset variants when preparing policy data.
+
 ## Documentation Development Workflow
 
 The standard `uv sync --frozen` command installs the documentation tools. For

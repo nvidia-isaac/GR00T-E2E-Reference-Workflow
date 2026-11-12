@@ -27,16 +27,25 @@ from typing import Any
 type Vec2 = tuple[float, float]
 type Vec3 = tuple[float, float, float]
 
-# Asset library root; override E2E_ASSET_ROOT to point at a mirror. Assets store a
-# root-relative path and the root is excluded from contract_digest, so mirroring the
-# library does not change environment identity (record/eval parity holds).
-_DEFAULT_ASSET_ROOT = "omniverse://isaac-dev.ov.nvidia.com/Projects/GR00T_E2E_RA/assets"
-
-
-def _asset_root() -> str:
-    """Resolve the asset library root, honoring E2E_ASSET_ROOT (empty falls back)."""
-
-    return (os.environ.get("E2E_ASSET_ROOT") or _DEFAULT_ASSET_ROOT).rstrip("/")
+# Transport URLs stay outside the environment contract so mirrors retain the
+# same library-relative identities used by recorded datasets.
+_ISAAC_ASSET_ROOT = "https://omniverse-content-production.s3-us-west-2.amazonaws.com/Assets/Isaac"
+_PUBLIC_ASSET_URLS = {
+    "background_library/warehouse/warehouse.usd": (
+        f"{_ISAAC_ASSET_ROOT}/6.0/Isaac/Environments/Simple_Warehouse/warehouse.usd"
+    ),
+    "object_library/table/table.usd": (
+        f"{_ISAAC_ASSET_ROOT}/6.0/Isaac/IsaacLab/Mimic/nut_pour_task/nut_pour_assets/table.usd"
+    ),
+    "object_library/apple/apple.usd": (
+        f"{_ISAAC_ASSET_ROOT}/6.1/Isaac/IsaacLab/Arena/assets/object_library/"
+        "srl_robolab_assets/objects/objaverse/apple_02.usd"
+    ),
+    "object_library/clay_plate/clay_plate.usd": (
+        f"{_ISAAC_ASSET_ROOT}/6.0/Isaac/IsaacLab/Arena/assets/object_library/"
+        "srl_robolab_assets/objects/hot3d/clay_plates.usd"
+    ),
+}
 
 
 _REQUIRED_ASSET_ROLES = {"background", "support", "pick_object", "destination"}
@@ -53,7 +62,7 @@ class SceneAssetDefinition:
     role: str
     name: str
     prim_path: str
-    usd_relpath: str  # relative to the asset root; see _asset_root
+    usd_relpath: str  # library-relative identity and mirror path
     scale: Vec3 = (1.0, 1.0, 1.0)
     rotation_xyzw: tuple[float, float, float, float] = (0.0, 0.0, 0.0, 1.0)
     origin_above_bottom_m: float = 0.0
@@ -67,9 +76,11 @@ class SceneAssetDefinition:
 
     @property
     def usd_path(self) -> str:
-        """Full USD path: the env-resolved asset root joined with the relative path."""
+        """Resolve the public asset or its counterpart in an explicit library mirror."""
 
-        return f"{_asset_root()}/{self.usd_relpath}"
+        if root := os.environ.get("E2E_ASSET_ROOT"):
+            return f"{root.rstrip('/')}/{self.usd_relpath}"
+        return _PUBLIC_ASSET_URLS[self.usd_relpath]
 
 
 @dataclass(frozen=True)
