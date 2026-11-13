@@ -41,8 +41,9 @@ also need [Asset Preparation](../how-to/prepare-h2.md).
 
 ## Access and Storage
 
-Obtain access to the private workflow repositories linked below and accept any
-required access terms. From the installed workflow environment, authenticate:
+Use the Hugging Face links below to find the workflow models and datasets.
+If a download requires authentication, sign in from the installed workflow
+environment:
 
 ```bash
 uv run --frozen --no-sync hf auth login
@@ -52,10 +53,12 @@ uv run --frozen --no-sync hf auth login
 uv run --frozen --no-sync hf auth whoami
 ```
 
-Training and inference also require access to GR00T N1.7 and Cosmos-Reason2-2B,
-as described on the stage pages. These commands use immutable revisions recorded
-in `runtime.toml` under `artifacts`. A 401/403 response requires access to the
-selected repository; retrying anonymously does not resolve it.
+For training and inference, follow the GR00T N1.7 and Cosmos-Reason2-2B setup
+instructions on the stage pages. If a download returns 401/403, check the active
+account and follow the instructions on the repository page.
+
+These commands use immutable revisions recorded in `runtime.toml` under
+`artifacts`.
 
 HDF5 and LeRobot downloads use the `dataset_revision` pin. Models use
 `model_revision`. Keep the metadata embedded in each HDF5 file unchanged. It

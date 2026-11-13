@@ -35,7 +35,7 @@ workcell, and placement predicate.
 The model is materialized from the exact Unitree H2 Plus asset with
 `Physics=physx`, `hands=sharpa`, and `collision_profile=full`. A content-pinned,
 kinematics-only URDF is generated for Pink. Generated assets remain outside
-the repository. The restricted AGILE policy's revision and digest are owned by
+the repository. The AGILE policy's revision and digest are owned by
 `configs/robots/h2.yaml`.
 
 ## Action and State Formats

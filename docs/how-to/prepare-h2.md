@@ -27,11 +27,7 @@ Complete [Installation](../installation.md). Run commands from the repository
 root on the GPU workstation. Recording later requires a PICO 4 Ultra headset
 on the workstation's LAN and its paired handheld XR controllers.
 
-Obtain access to the restricted
-[`nvidia/agile_wbc_unitree_h2`](https://huggingface.co/nvidia/agile_wbc_unitree_h2)
-repository before downloading its policy. If the repository is unavailable to
-your account, request access from its owner. Accepting public model terms alone
-may not grant access.
+The AGILE policy is available [here](https://huggingface.co/nvidia/agile_wbc_unitree_h2).
 
 ## Prepare the Simulation Assets
 
@@ -74,19 +70,7 @@ may not grant access.
 
 ## Download the AGILE Policy
 
-1. Authenticate with the Hugging Face account that has policy access:
-
-   ```bash
-   uv run --frozen --no-sync hf auth login
-   ```
-
-   Verify the active account:
-
-   ```bash
-   uv run --frozen --no-sync hf auth whoami
-   ```
-
-2. Download the repository, revision, and filename specified in
+1. Download the repository, revision, and filename specified in
    `configs/robots/h2.yaml`, then verify the configured digest. Continue only
    after each command succeeds:
 

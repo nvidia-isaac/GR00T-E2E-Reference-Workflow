@@ -85,12 +85,3 @@ copybutton_prompt_is_regexp = True
 linkcheck_anchors = True
 linkcheck_retries = 2
 linkcheck_timeout = 20
-# Private workflow assets are verified with authenticated Hub metadata.
-# Remove each exact exception when that repository becomes publicly accessible.
-linkcheck_ignore = [
-    r"https://huggingface\.co/nvidia/agile_wbc_unitree_h2$",
-    r"https://huggingface\.co/datasets/nvidia/GR00T-E2E-Reference-Workflow-SIM-G1-N1\.7-AppletoPlate-Dataset$",
-    r"https://huggingface\.co/nvidia/GR00T-E2E-Reference-Workflow-SIM-G1-N1\.7-AppletoPlate-Model$",
-    r"https://huggingface\.co/datasets/nvidia/GR00T-E2E-Reference-Workflow-SIM-H2-N1\.7-AppleHandoverPlate-Dataset$",
-    r"https://huggingface\.co/nvidia/GR00T-E2E-Reference-Workflow-SIM-H2-N1\.7-AppleHandoverPlate-Model$",
-]

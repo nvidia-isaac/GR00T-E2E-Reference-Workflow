@@ -28,7 +28,7 @@ repos:
       - id: detect-private-key
       - id: check-added-large-files
         args: ["--enforce-all", "--maxkb=1024"]
-        exclude: '^docs/images/(real-robot-teleop-example[.]gif|unitree-top-down[.]jpg|xr-recording-complete[.]png|xr-teleop-controls[.]png|xr-teleop-headset-view[.]png)$'
+        exclude: '^docs/images/(real-robot-teleop-example[.]gif|unitree-top-down[.]jpg)$'
       - id: check-executables-have-shebangs
       - id: check-shebang-scripts-are-executable
 

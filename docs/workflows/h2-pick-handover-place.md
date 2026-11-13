@@ -185,10 +185,9 @@ set these values for published inputs.
 
 ## Hugging Face Dataset and Checkpoint
 
-These simulation datasets and checkpoints are in private Hugging Face
-repositories and require repository access. The checkpoint and dataset revisions are pinned
-in `runtime.toml`. The evaluation guide accepts your own training output or
-the published inference checkpoint.
+The checkpoint and dataset revisions are pinned in `runtime.toml`.
+The evaluation guide accepts your own training output or the published inference
+checkpoint.
 
 ::::{grid} 1 1 2 2
 :gutter: 3

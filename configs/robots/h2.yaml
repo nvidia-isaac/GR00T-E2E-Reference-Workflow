@@ -15,9 +15,9 @@
 
 # Unitree H2 Plus defaults for the Arena AGILE/Pink path.
 #
-# The plant is exclusively owned by configs/robots/h2_pink.yaml. The gated
-# checkpoint remains an environment input, but its Hub provenance and content
-# identity are pinned here.
+# The plant is exclusively owned by configs/robots/h2_pink.yaml. The checkpoint
+# remains an environment input, but its Hub provenance and content identity are
+# pinned here.
 policy_env_var: E2E_H2_AGILE_POLICY
 policy_repository: nvidia/agile_wbc_unitree_h2
 policy_revision: ad9c3c0d2c5ed5b353747dc7603ee5a1b38b628f

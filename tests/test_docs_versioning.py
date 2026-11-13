@@ -48,100 +48,23 @@ def ci_context(kind, ref, prefix, **extra):
     }
 
 
-def github_context(kind, ref, prefix, **extra):
-    """Supply public documentation identity without relying on GitLab variables."""
-    return {
-        "CI": "true",
-        "DOCS_KIND": kind,
-        "DOCS_REF": ref,
-        "PAGES_PREFIX": prefix,
-        "DOCS_SITE_URL": "https://example.org/project/docs/",
-        "GITHUB_ACTIONS": "true",
-        "GITHUB_SHA": SHA,
-        "GITHUB_REF_NAME": ref,
-        "GITHUB_REF_TYPE": "branch",
-        "GITHUB_EVENT_NAME": "push",
-        **extra,
-    }
-
-
 @pytest.mark.parametrize(
-    ("provider", "environment", "label", "command", "prefix"),
+    ("environment", "label", "command", "prefix"),
     [
-        ("gitlab", ci_context("development", "main", ""), "main (development)", "git clone --branch main", ""),
+        (ci_context("development", "main", ""), "main (latest published)", "git clone --branch main", ""),
         (
-            "gitlab",
             ci_context("release", "release/v0.2", "v0-2"),
             "v0.2 (release branch)",
             "git clone --branch release/v0.2",
             "v0-2/",
         ),
         (
-            "gitlab",
             ci_context("candidate", "rc3", "rc3", CI_COMMIT_TAG="rc3", CI_COMMIT_BRANCH=""),
             "rc3 (snapshot)",
-            "git clone --branch rc3",
+            "git clone --branch main",
             "rc3/",
         ),
         (
-            "gitlab",
-            ci_context(
-                "preview",
-                "feature/docs",
-                "mr-123",
-                CI_PIPELINE_SOURCE="merge_request_event",
-                CI_MERGE_REQUEST_IID="123",
-                CI_MERGE_REQUEST_SOURCE_BRANCH_NAME="feature/docs",
-            ),
-            "MR !123 (preview)",
-            f"git checkout --detach {SHA}",
-            "mr-123/",
-        ),
-        (
-            "gitlab",
-            ci_context("unpublished", "feature/docs", "", CI_PIPELINE_SOURCE="web"),
-            "feature/docs (unpublished)",
-            "git clone --branch feature/docs",
-            None,
-        ),
-        ("gitlab", {}, "Local build", "git clone --branch main", None),
-        (
-            "github",
-            github_context("development", "main", ""),
-            "main (latest published)",
-            "git clone --branch main",
-            "",
-        ),
-        (
-            "github",
-            github_context("release", "release/v0.2", "v0-2"),
-            "v0.2 (release branch)",
-            "git clone --branch release/v0.2",
-            "v0-2/",
-        ),
-        (
-            "github",
-            ci_context("release", "release/v0.2", "v0-2"),
-            "v0.2 (release branch)",
-            "git clone --branch release/v0.2",
-            "v0-2/",
-        ),
-        (
-            "github",
-            github_context(
-                "preview",
-                "feature/docs",
-                "pr-123",
-                GITHUB_EVENT_NAME="pull_request",
-                GITHUB_REF_NAME="123/merge",
-                GITHUB_HEAD_REF="feature/docs",
-            ),
-            "PR #123 (preview)",
-            "git clone --branch main",
-            "pr-123/",
-        ),
-        (
-            "github",
             ci_context(
                 "preview",
                 "feature/docs",
@@ -155,65 +78,24 @@ def github_context(kind, ref, prefix, **extra):
             "mr-123/",
         ),
         (
-            "github",
             ci_context("unpublished", "feature/docs", "", CI_PIPELINE_SOURCE="web"),
             "feature/docs (unpublished)",
             "git clone --branch main",
             None,
         ),
-        (
-            "github",
-            ci_context("candidate", "rc3", "rc3", CI_COMMIT_TAG="rc3", CI_COMMIT_BRANCH=""),
-            "rc3 (snapshot)",
-            "git clone --branch main",
-            "rc3/",
-        ),
-        (
-            "github",
-            github_context("candidate", "rc5", "rc5", GITHUB_REF_TYPE="tag"),
-            "rc5 (snapshot)",
-            "git clone --branch rc5",
-            "rc5/",
-        ),
-        ("github", {}, "Local build", "git clone --branch main", None),
+        ({}, "Local build", "git clone --branch main", None),
     ],
 )
-def test_rendered_documentation_matches_source(tmp_path, provider, environment, label, command, prefix):
+def test_rendered_documentation_matches_source(tmp_path, environment, label, command, prefix):
     """Check the built pages and copied commands through the real Sphinx pipeline."""
     pytest.importorskip("sphinx")
     pytest.importorskip("nvidia_sphinx_theme")
     source = tmp_path / "docs"
     shutil.copytree(REPOSITORY / "docs", source, ignore=shutil.ignore_patterns("_build", "__pycache__"))
-    with (source / "conf.py").open("a") as config:
-        config.write(f'\ndocs_repository_provider = "{provider}"\n')
-    expected_sha = SHA if environment else ""
-    if provider == "github" and not environment:
-        subprocess.run(["git", "init", "--quiet", str(tmp_path)], check=True)
-        subprocess.run(
-            [
-                "git",
-                "-c",
-                "user.name=Documentation test",
-                "-c",
-                "user.email=docs@example.org",
-                "-c",
-                "core.hooksPath=/dev/null",
-                "commit",
-                "--allow-empty",
-                "--quiet",
-                "-m",
-                "Public export",
-            ],
-            cwd=tmp_path,
-            check=True,
-        )
-        expected_sha = subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=tmp_path, text=True).strip()
     output = tmp_path / "html"
     output.mkdir()
     (output / "versions.json").write_text("stale catalog")
-    clean_env = {
-        key: value for key, value in os.environ.items() if not key.startswith(("CI", "DOCS_", "PAGES_", "GITHUB_"))
-    }
+    clean_env = {key: value for key, value in os.environ.items() if not key.startswith(("CI", "DOCS_", "PAGES_"))}
     result = subprocess.run(
         [
             sys.executable,
@@ -250,27 +132,23 @@ def test_rendered_documentation_matches_source(tmp_path, provider, environment, 
         "git rev-parse HEAD",
     ):
         assert setup_command in copied_commands
-    for lfs_command in ("git lfs install --local", "git lfs pull"):
-        assert (lfs_command in copied_commands) == (provider == "gitlab")
     selected_command = next(block for block in copied_commands if command in block)
     assert len(selected_command.replace("\\\n", "").splitlines()) == 1
     assert "@@DOCS_" not in text
     info = json.loads((output / "build-info.json").read_text())
     assert info["label"] == label
-    assert info["sha"] == expected_sha
-    if expected_sha:
-        assert info["ref"] == environment.get("DOCS_REF", "main")
-    assert "documentation-source-commit" not in text
+    if environment:
+        assert info["sha"] == SHA
+        assert info["ref"] == environment["DOCS_REF"]
+    assert SHA not in text
     assert "source commit is" not in text
+    assert "git fetch origin" not in text
+    assert "git lfs" not in text
     assert "https://github.com/nvidia-isaac/GR00T-E2E-Reference-Workflow.git" in text
     assert 'class="fa-brands fa-github' in rendered
     assert "From the GR00T-E2E-Reference-Workflow directory:" in text
-    if provider == "github":
-        if expected_sha:
-            assert expected_sha not in text
-        assert "git fetch origin" not in text
-        if environment.get("DOCS_KIND") in {"preview", "unpublished"}:
-            assert "These instructions select main." in text
+    if environment.get("DOCS_KIND") in {"preview", "unpublished", "candidate"}:
+        assert "These instructions select main." in text
     if prefix is not None:
         assert f"https://example.org/project/docs/{prefix}installation.html" in rendered
         assert info["site_url"] == f"https://example.org/project/docs/{prefix}"
@@ -291,7 +169,6 @@ def test_rendered_documentation_matches_source(tmp_path, provider, environment, 
     if environment.get("DOCS_KIND") == "development":
         catalog = json.loads((output / "versions.json").read_text())
         assert [entry["version"] for entry in catalog] == ["main", "v0.2"]
-        assert catalog[0]["name"] == label
         assert next(entry["url"] for entry in catalog if entry["version"] == "v0.2") == (
             "https://example.org/project/docs/v0-2/"
         )
@@ -300,44 +177,23 @@ def test_rendered_documentation_matches_source(tmp_path, provider, environment, 
 
 
 @pytest.mark.parametrize(
-    ("provider", "changes"),
+    "changes",
     [
-        ("gitlab", {"DOCS_KIND": ""}),
-        ("gitlab", {"CI_COMMIT_SHA": "short"}),
-        ("gitlab", {"DOCS_REF": "main"}),
-        ("gitlab", {"PAGES_PREFIX": ""}),
-        ("gitlab", {"PAGES_PREFIX": "../main"}),
-        ("gitlab", {"PAGES_PREFIX": "rc2"}),
-        ("github", {"GITHUB_SHA": "short"}),
-        ("github", {"GITHUB_REF_NAME": "main"}),
-        ("github", {"GITHUB_REF_TYPE": "tag"}),
+        {"DOCS_KIND": ""},
+        {"CI_COMMIT_SHA": "short"},
+        {"DOCS_REF": "main"},
+        {"PAGES_PREFIX": ""},
+        {"PAGES_PREFIX": "../main"},
+        {"PAGES_PREFIX": "rc2"},
     ],
 )
-def test_inconsistent_release_context_is_rejected(monkeypatch, provider, changes):
+def test_inconsistent_release_context_is_rejected(monkeypatch, changes):
     """Reject metadata that could label or publish release documentation incorrectly."""
     monkeypatch.syspath_prepend(str(REPOSITORY / "docs" / "_ext"))
     versioning = importlib.import_module("versioning")
     catalog = versioning.read_catalog(REPOSITORY / "docs" / "versions.json")
-    context = github_context if provider == "github" else ci_context
     with pytest.raises(ValueError):
-        versioning.resolve_context(
-            {**context("release", "release/v0.2", "v0-2"), **changes}, REPOSITORY, catalog, provider
-        )
-
-
-def test_checkout_commands_are_numbered(monkeypatch):
-    """Present checkout commands as an ordered procedure."""
-    monkeypatch.syspath_prepend(str(REPOSITORY / "docs" / "_ext"))
-    versioning = importlib.import_module("versioning")
-    catalog = versioning.read_catalog(REPOSITORY / "docs" / "versions.json")
-    context = versioning.resolve_context(ci_context("development", "main", ""), REPOSITORY, catalog)
-
-    block = versioning.checkout_block(context, "ssh://example.org/repo.git")
-    numbered_steps = [line for line in block.splitlines() if re.fullmatch(r"[1-9][0-9]*\. .+:", line)]
-
-    assert len(numbered_steps) == 7
-    assert numbered_steps[0] == "1. Create a workspace directory:"
-    assert numbered_steps[-1] == "7. Print the checked-out source commit:"
+        versioning.resolve_context({**ci_context("release", "release/v0.2", "v0-2"), **changes}, REPOSITORY, catalog)
 
 
 def test_future_release_can_build_before_catalog_registration(monkeypatch):

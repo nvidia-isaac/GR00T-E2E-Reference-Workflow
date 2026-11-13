@@ -85,7 +85,7 @@ Check the GPU and driver:
 nvidia-smi --query-gpu=name,memory.total,driver_version --format=csv
 ```
 
-Network access is required to NVIDIA GitLab, Python package indexes, GitHub,
+Network access is required to the source project, Python package indexes, GitHub,
 simulator assets, and Hugging Face. Training requires access to the gated model
 repositories described in [Model Access](how-to/fine-tune-gr00t.md#model-access).
 For XR recording, also prepare the [headset and network](#xr-recording-requirements)
@@ -112,6 +112,7 @@ and connect the headset for a recording session.
 Install [Git](https://git-scm.com/downloads) and
 [uv](https://docs.astral.sh/uv/getting-started/installation/)
 using their installation instructions before cloning the repository.
+
 
 ## Clone the Repository
 

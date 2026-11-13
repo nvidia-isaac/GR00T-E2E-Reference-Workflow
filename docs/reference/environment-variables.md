@@ -48,7 +48,6 @@ another machine, or an already running container.
 | --- | --- | --- |
 | `ACCEPT_EULA`, `OMNI_KIT_ACCEPT_EULA` | For non-interactive Isaac Sim launch, `Y` and `YES` respectively, only after accepting the license terms. | [Installation](../installation.md#create-and-check-the-simulation-environment) |
 | `E2E_ARENA_ROOT` | Optional override for the pinned Isaac Lab-Arena checkout. Unset uses the managed `.arena/` checkout under this repository. | [How Arena Is Obtained](development.md#how-arena-is-obtained) |
-| `E2E_ARENA_ROOT_PATH` | Optional GitLab project variable for an Isaac Lab-Arena checkout provisioned on the runner. The Arena CI jobs map it to `E2E_ARENA_ROOT`; local launchers read `E2E_ARENA_ROOT` directly. | [How Arena Is Obtained](development.md#how-arena-is-obtained) |
 | `ISAAC_GR00T_ROOT` | Absolute path to the clean, synced Isaac-GR00T checkout pinned in `runtime.toml`. Required by the documented training, loader-validation, and evaluation commands. Launchers also accept `--gr00t-root`. | {ref}`Prepare the GR00T Checkout <prepare-gr00t-checkout>` |
 
 The EULA settings apply to simulation processes, including replay and

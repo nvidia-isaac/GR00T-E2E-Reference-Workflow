@@ -154,10 +154,8 @@ Start conversion with a [generated HDF5 download](../how-to/convert-g1-dataset.m
 
 ## Hugging Face Dataset and Checkpoint
 
-These simulation datasets and checkpoints are in private Hugging Face
-repositories. Viewing or downloading them requires repository access and
-acceptance of the NVIDIA access terms. The checkpoint below is separate from
-the released checkpoint pinned in `runtime.toml`.
+The checkpoint below is separate from the released checkpoint pinned in
+`runtime.toml`.
 
 ::::{grid} 1 1 2 2
 :gutter: 3
