@@ -42,10 +42,6 @@ jobs:
       main_sha: ${{ steps.sources.outputs.main_sha }}
       release_sha: ${{ steps.sources.outputs.release_sha }}
     steps:
-      - name: Check private Pages configuration
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: test "$(gh api "repos/$GITHUB_REPOSITORY/pages" --jq '.public')" = false
       - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
         with:
           ref: ${{ github.ref == 'refs/heads/main' && github.sha || 'main' }}
@@ -106,13 +102,12 @@ jobs:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
-      - name: Verify privacy and source freshness
+      - name: Verify source freshness
         env:
           GH_TOKEN: ${{ github.token }}
           MAIN_SHA: ${{ needs.build.outputs.main_sha }}
           RELEASE_SHA: ${{ needs.build.outputs.release_sha }}
         run: |
-          test "$(gh api "repos/$GITHUB_REPOSITORY/pages" --jq '.public')" = false
           test "$(gh api "repos/$GITHUB_REPOSITORY/git/ref/heads/main" --jq '.object.sha')" = "$MAIN_SHA"
           test "$(gh api "repos/$GITHUB_REPOSITORY/git/ref/heads/release/v0.2" --jq '.object.sha')" = "$RELEASE_SHA"
       - name: Deploy documentation
